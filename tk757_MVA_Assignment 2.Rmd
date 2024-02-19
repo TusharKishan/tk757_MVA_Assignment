@@ -1,0 +1,43 @@
+---
+title: "Untitled"
+author: "Tushar"
+date: "2024-02-19"
+output: html_document
+---
+
+
+library(readr)
+library(graphics)
+library(dplyr)
+library(ggplot2)
+Laptop <- read_csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+str(Laptop)
+dim(Laptop)
+names(Laptop)
+str(Laptop)
+summary(Laptop)
+
+#Question 1 - What is the average price difference of laptops with a screen size greater than 14 inches and those with 14 inches or smaller, considering only laptops with a storage capacity of 512 GB or more
+
+ggplot(Laptop, aes(x=Screen_Size,y=Price))+ facet_wrap(Storage_Capacity) + geom_point()
+
+
+#Ans) The picture shows the distribution of the price ranges of different laptops, comparing the screen Sizes and Storage Capacity. The visualization shows us that the average price for laptop with screen size more that 14 inches and storage capacity of 512 gb is around 17,500 dollars and the average price for laptops with a storage capacity of more than 512 gb and a screen size of greater than 14 inches is around 35,000. The average price of screen size less than 14 inches and equal to 512gb is 15,000 and the average price of screen size less than 14 inches and greater than 512 gb is 30,000
+
+
+#Question 2 - 1. Among laptops with processor speeds exceeding 3.5 GHz, which model offers the best balance of performance.
+
+ggplot(Laptop, aes(x=Processor_Speed, y=Brand)) + geom_hex()
+
+#Ans) The picture shows us the distributiob of different band of laptops with their processing speeds. From the visualiztion it is clear that the model which offers a processing speed exceeding 3.5 H is Dell. Dell has a total count of 6 laptops in which the processing speed is more than 3.5 Hz. After HP, Hp comes in the second place where there are 5 laptops where the processing speed is more than 3.5 Hz. In the last place we get Asus, where there are only two laptops with a processing speed more than 3.5 Hz 
+
+plot(Storage_Capacity~Screen_Size)
+plot(Storage_Capacity~Screen_Size)
+abline(lm(Storage_Capacity~Screen_Size, col="red")
+
+plot(Storage_Capacity~Screen_Size, col="steelblue", pch=15, main="Laptop Price", xlab="Storage Capacity", 
+     ylab="Screen_Size", xlim=c(10,40))
+
+
+
+plot(Screen_Size, Price, xlab="Screen_Size", ylab="Price",pch=c(15, 1))
