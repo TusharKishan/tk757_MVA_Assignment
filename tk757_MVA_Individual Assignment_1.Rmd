@@ -1,0 +1,62 @@
+---
+title: "Untitled"
+author: "Tushar"
+date: "2024-02-19"
+output: html_document
+---
+
+1. Ask an important question you want answered 
+
+1A. What is the average price difference between different brands laptops with a screen size greater than 14 inches and those with 14 inches or smaller, considering only laptops with a storage capacity of 512 GB or more  
+
+1B. Among laptops with processor speeds exceeding 3.5 GHz, which model offers the best balance of performance and price considering the RAM size and storage capacity.
+
+2. Answer why this question(s) is/are important to you
+
+2A. This question is important to me as I wish to understand the average price difference between with different screen sizes and storage capacities. Having  an answer to this question can provide valuable insights for pricing strategies, product positioning, and consumer preferences.  This information could also help manufacturers and retailers adjust their product offerings and pricing strategies to better meet consumer demand and maximize revenue. Also Insights from this analysis can tell us about the product development efforts.
+
+2B. This question is important to me as I wish to understand because it helps consumers like me to  make informed decisions when purchasing laptops. By identifying the model that offers the best balance of performance and price among those with high processor speeds, consumers can ensure they are getting the most value for their money. Also by answering this question we can help a consumer make more informed decisions who wants to buy a particular brand.
+
+3. Find and collect data (need one dependent variable and more than 3 dependent variables)
+
+3A. Dependent - Price
+    Independent - Screen Size, Storage Capacity, Brand
+    
+3B. Dependent - Price                                                                                                  Independent - Processing Speed, RAM Size, Storage Capacity
+
+4 Describe your data (create a data dictionary)
+Ans) 
+1. Variable Name - Brand,
+Description - Brand of the laptop,
+Data Type - Text,
+Unit of Measure - N/A
+        
+2. Variable Name - Processor Speed,
+Description - Processing power of the laptop,
+Data Type - Numeric
+Unit of Measure - N/A
+        
+3. Variable Name - RAM Size,
+Description - Size of the Ram for the particular laptop,
+Data Type - Numeric,
+Unit of Measure - N/A
+      
+4. Variable Name - Storage Capacity,
+Description - How much memory can the laptop store,
+Data Type - Numeric,
+Unit of Measure - N/A
+     
+5. Variable Name - Screen Size,
+Description - Size of the lapotop's screen or screen resolution of the laptop,
+Data Type - Numeric,
+Unit of Measure - N/A
+
+6. Variable Name - Weight,
+Description - Weight of the laptop,
+Data Type - Numeric,
+Unit of Measure - N/A
+
+7. Variable Name - Price,
+Description - Price of the laptop,
+Data Type - Numeric,
+Unit of Measure - N/A,
