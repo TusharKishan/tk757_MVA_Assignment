@@ -1,0 +1,61 @@
+---
+title: "Untitled"
+author: "Tushar"
+date: "2024-02-25"
+output: html_document
+---
+
+library(readr)
+Laptop <- read_csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+attach(Laptop)
+str(Laptop)
+Laptop$Brand <- as.factor(Laptop$Brand)
+Laptop_x <- Laptop[, 2:7]
+Laptop_x
+Laptop_cm <- colMeans(Laptop_x)
+Laptop_S <- cov(Laptop_x)
+Laptop_d <- apply(Laptop_x, MARGIN = 1, function(Laptop_x)t(Laptop_x - Laptop_cm) %*% solve(Laptop_S) %*% (Laptop_x - Laptop_cm))
+Laptop_cm
+Laptop_S
+Laptop_d
+
+#1) Performing a univariate analysis on the laptop Brands Dell and HP with each of the following parameters, such as RAM size, weight, price etc and determining the mean of each?
+
+#t tests
+with(data=Laptop,t.test(Processor_Speed[Brand=="Dell"],Processor_Speed[Brand=="HP"],var.equal=TRUE))
+with(data=Laptop,t.test(RAM_Size[Brand=="Dell"],RAM_Size[Brand=="HP"],var.equal=TRUE))
+with(data=Laptop,t.test(Storage_Capacity[Brand=="Dell"],Storage_Capacity[Brand=="HP"],var.equal=TRUE))
+with(data=Laptop,t.test(Screen_Size[Brand=="Dell"],Screen_Size[Brand=="HP"],var.equal=TRUE))
+with(data=Laptop,t.test(Weight[Brand=="Dell"],Weight[Brand=="HP"],var.equal=TRUE))
+with(data=Laptop,t.test(Price[Brand=="Dell"],Price[Brand=="HP"],var.equal=TRUE))
+
+#Ans) The t-value indicates how different the means of the two groups are relative to the variance in the data. A larger t-value suggests a greater difference between the means.The p-value is the probability of observing such an extreme difference in means if the true difference is actually zero. A low p-value (typically below 0.05) suggests that the observed difference is unlikely to be due to random chance.The 95% confidence interval provides a range of values within which we can be 95% confident that the true difference in means lies. In this case, the interval includes zero, indicating that we cannot be confident that there is a true difference between the processor speeds of Dell and HP laptops.
+
+#2) Performing a univariate analysis on the laptop brands Asus and Acer using two of its paramaeters, RAM size and price, and determining the variance for both?
+
+#F tests
+attach(Laptop)
+var.test(RAM_Size[Brand=="Asus"],RAM_Size[Brand=="Acer"])
+var.test(Price[Brand=="Asus"],Price[Brand=="Acer"])
+
+#Ans 1) This first analysis compares the variances of RAM sizes between Asus and Acer laptops and the second analysis compares the variances of Prices between Asus and Acer laptops.The F-value is a measure of the ratio of variances. It compares how much the data points vary from the mean within each group relative to the variance between the group means. A value close to 1 suggests that the variances are similar.The degrees of freedom for the numerator are related to the precision of the estimate. Higher degrees of freedom generally indicate more reliable results.
+
+#3) Performing a multivariate study on laptop brands using the all of its parameters and computing the mean?
+
+#Hotelling test
+library(Hotelling)
+new_test <- hotelling.test(Processor_Speed + RAM_Size + Storage_Capacity + Screen_Size + Weight +Price ~ Brand, data=Laptop)
+
+cat("T2 statistic =",new_test$stat[[1]],"\n")
+print(new_test)
+
+#Ans)This analysis uses a T² statistic to compare multiple means simultaneously. The T² statistic value is 4.187586, and it is used to test whether there are significant differences between the means of multiple groups.In this analysis, with a p-value of 0.6853, we do not have enough evidence to reject the null hypothesis, which would suggest that there are no significant differences between the group means.
+
+
+#4) Performing a multivariate analysis on the laptop brands to determine their variance.
+
+#Manova
+summary(manova(as.matrix(Laptop[,-1])~ Brand))
+
+#Ans)This analysis is a multivariate analysis of variance (MANOVA) assessing the effect of the "Brand" variable on several dependent variables simultaneously.In this analysis, the p-value of 0.9629 indicates that there is no significant effect of the "Brand" variable on the dependent variables.
+
