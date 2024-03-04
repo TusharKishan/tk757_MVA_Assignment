@@ -1,0 +1,121 @@
+---
+title: "Assignment 4"
+author: "Tushar"
+date: "2024-03-03"
+output: html_document
+---
+
+```{r}
+library(readr)
+Laptop <- read_csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+attach(Laptop)
+str(Laptop)
+
+#Get the Correlations between the measurements
+cor(Laptop[-1])
+
+# Using prcomp to compute the principal components (eigenvalues and eigenvectors). 
+Laptop_pca <- prcomp(Laptop[,-1],scale=TRUE)
+Laptop_pca
+summary(Laptop_pca)
+
+#1 Decide how many Principal Components (PCs) you want to keep and why
+#Ans) Based on the summary of the principal component analysis (PCA) on my dataset, I would retain the first three principal components (PCs) as they explain a significant amount of variance in the data.The first three PCs explain a significant proportion of the total variance in the data. Specifically, they explain 70.51% of the variance, with PC1 explaining 34.85%, PC2 explaining 18.94%, and PC3 explaining 16.72%.The cumulative proportion of variance explained by the first three PCs is 0.7051, meaning that these three components capture over 70% of the variability in the original data.By retaining the first three PCs I can effectively reduce the dimensionality of your data from six variables to three components, while still retaining a large amount of information about the original variables.Keeping the first three principal components would be a reasonable choice, as they capture a substantial amount of the variance in the data and provide a more compact representation of the original variables. The cumulative proportion reaches 85.76% after the third PC, indicating that adding more PCs beyond the third contributes relatively little to explaining the variance.
+
+
+(eigen_Laptop <- Laptop_pca$sdev^2)
+
+
+names(eigen_Laptop) <- paste("PC",1:5,sep="")
+eigen_Laptop
+
+sumlambdas <- sum(eigen_Laptop)
+sumlambdas
+
+propvar <- eigen_Laptop/sumlambdas
+propvar
+
+cumvar_Laptop <- cumsum(propvar)
+cumvar_Laptop
+
+matlambdas <- rbind(eigen_Laptop,propvar,cumvar_Laptop)
+rownames(matlambdas) <- c("Eigenvalues","Prop. variance","Cum. prop. variance")
+round(matlambdas,4)
+
+summary(Laptop_pca)
+
+Laptop_pca$rotation
+
+print(Laptop_pca)
+
+## Sample scores stored in Laptop_pca$x
+Laptop_pca$x
+
+attributes(Laptop_pca)
+
+
+Laptopyp_pca <- cbind(data.frame(Brand),Laptop_pca$x)
+Laptopyp_pca
+
+
+tabmeansPC <- aggregate(Laptopyp_pca[,2:6],by=list(Brand=Laptop$Brand),mean)
+tabmeansPC
+
+tabmeansPC <- tabmeansPC[rev(order(tabmeansPC$Brand)),]
+tabmeansPC
+
+tabfmeans <- t(tabmeansPC[,-1])
+tabfmeans
+
+colnames(tabfmeans) <- t(as.vector(tabmeansPC[1]$Brand))
+tabfmeans
+
+
+tabsdsPC <- aggregate(Laptopyp_pca[,2:6],by=list(Brand=Laptop$Brand),sd)
+tabfsds <- t(tabsdsPC[,-1])
+colnames(tabfsds) <- t(as.vector(tabsdsPC[1]$Brand))
+tabfsds
+
+#2 Explain the variate representation each PCs
+#Ans In PC1 Processor_Speed has a moderate negative loading.RAM_Size has a small negative loading. Storage_Capacity has a large positive loading. Screen_Size has a small negative loading. Weight has a small positive loading. Price has a large positive loading. This component seems to capture laptops with high storage capacity and price, with some influence from processor speed and weight.Lenovo has the highest mean score on PC1, indicating that laptops from Lenovo might be perceived as offering good performance and value for their price. In PC2 Processor_Speed has a moderate positive loading. RAM_Size has a large negative loading. Storage_Capacity has a small positive loading. Screen_Size has a large negative loading. Weight has a large negative loading. Price has a small positive loading. This component seems to capture laptops with lower RAM size, screen size, and weight, but higher processor speed.HP has the highest mean score on PC2, suggesting that HP laptops might be perceived as offering a good balance between performance and portability. In PC3 Processor_Speed has a large positive loading. RAM_Size has a large positive loading. Storage_Capacity has a small positive loading. Screen_Size has a moderate negative loading. Weight has a small positive loading. Price has a small positive loading. This component seems to capture laptops with higher RAM size and processor speed, but lower screen size.Dell has the highest mean score on PC3, indicating that Dell laptops might be perceived as offering larger screen sizes and possibly catering to multimedia or gaming. In PC4 Processor_Speed has a large positive loading. RAM_Size has a small negative loading. Storage_Capacity has a small positive loading. Screen_Size has a moderate positive loading. Weight has a small negative loading. Price has a small positive loading. This component seems to capture laptops with higher processor speed and screen size, but lower RAM size.Asus has the highest mean score on PC4, suggesting that Asus laptops might be perceived as offering good performance but at a higher price point. In PC5 Processor_Speed has a moderate positive loading. RAM_Size has a small negative loading. Storage_Capacity has a small negative loading. Screen_Size has a small negative loading. Weight has a moderate positive loading. Price has a moderate negative loading. This component seems to capture laptops with higher weight and lower price, with some influence from processor speed.cer has the highest mean score on PC5, indicating that Acer laptops might be perceived as more lightweight and portable.
+
+#3 Perform some visualization using PCs
+
+plot(eigen_Laptop, xlab = "Component number", ylab = "Component variance", type = "l", main = "Scree diagram")
+#Ans) From the above graph, we can stop at any of the sharp edges, according to my analysis above, I have decided to retain only till PC3, to balance between capturing a substantial portion of the variance
+
+plot(log(eigen_Laptop), xlab = "Component number",ylab = "log(Component variance)", type="l",main = "Log(eigenvalue) diagram")
+
+#Ans) From the above graph, we can stop at any of the sharp edges, according to my analysis above, I have decided to retain only till PC3, to balance between capturing a substantial portion of the variance
+
+plot(Laptop_pca)
+#The above graph shows us the variance against the principle components
+
+diag(cov(Laptop_pca$x))
+
+xlim <- range(Laptop_pca$x[,1])
+Laptop_pca$x[,1]
+
+Laptop_pca$x
+
+plot(Laptop_pca$x,xlim=xlim,ylim=xlim)
+
+#The above graph is a scatter plot which shows us the first principal component score (x-axis) against the second principal component score (y-axis), with the limits of both axes set to the range of the first principal component scores.We calculate the diagonal elements of the covariance matrix of the principal component scores (Laptop_pca$x), sets the x-axis limits (xlim) to the range of the first column of the scores, and then attempts to create a plot of the principal component scores.
+
+Laptop$Brand <- as.factor(Laptop$Brand)
+out <- sapply(1:5, function(i){plot(Laptop$Brand,Laptop_pca$x[,i],xlab=paste("PC",i,sep=""),ylab="Brand")})
+
+#The above graph shows us five seperate boxplots one for each of the first five principal components (PC1 to PC5). Each plot will show the scores of the corresponding principal component (Laptop_pca$x[,i]) on the y-axis, and the laptop brands (Laptop$Brand) on the x-axis.It also shows us the the distribution of laptop brands along the principal component axes. How each laptop brand is positioned relative to the others in the space defined by the principal components. Any patterns or clusters that might exist among the laptop brands based on their feature values (represented by the principal component scores).
+
+library(factoextra)
+library(FactoMineR)
+library(ggfortify)
+library(psych)
+library(corrplot)
+library(devtools)
+fviz_eig(Laptop_pca, addlabels = TRUE)
+
+# The above graph gives us a a scree plot, which is a line plot showing the magnitude of each eigenvalue. This plot helps you decide how many principal components to retain based on the "elbow" point, where the eigenvalues start to level off.It also tells us about the proportion of variance of each component.
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
