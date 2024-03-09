@@ -1,0 +1,141 @@
+---
+title: "Clustering Analysis"
+author: "Tushar"
+date: "2024-03-08"
+output: html_document
+---
+
+```{r}
+library(cluster)
+library(readr)
+library(factoextra)
+library(magrittr)
+library(NbClust)
+
+
+Laptop <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+Laptop
+matstd.Laptop <- scale(Laptop[,2:7])
+# K-means, k=2, 3, 4, 5, 6
+# Centers (k's) are numbers thus, 10 random sets are chosen
+
+(kmeans2.Laptop <- kmeans(matstd.Laptop,2,nstart = 10))
+# Computing the percentage of variation accounted for. Two clusters
+perc.var.2 <- round(100*(1 - kmeans2.Laptop$betweenss/kmeans2.Laptop$totss),1)
+names(perc.var.2) <- "Perc. 2 clus"
+perc.var.2
+
+#Ans) The cluster-sum of squares is observed to be 69.4%.
+
+# Computing the percentage of variation accounted for. Three clusters
+(kmeans3.Laptop <- kmeans(matstd.Laptop,3,nstart = 10))
+perc.var.3 <- round(100*(1 - kmeans3.Laptop$betweenss/kmeans3.Laptop$totss),1)
+names(perc.var.3) <- "Perc. 3 clus"
+perc.var.3
+
+#Ans) The cluster-sum of squares is observed to be 59.9%
+
+# Computing the percentage of variation accounted for. Four clusters
+(kmeans4.Laptop <- kmeans(matstd.Laptop,4,nstart = 10))
+perc.var.4 <- round(100*(1 - kmeans4.Laptop$betweenss/kmeans4.Laptop$totss),1)
+names(perc.var.4) <- "Perc. 4 clus"
+perc.var.4
+
+#Ans) The cluster-sum of squares is observed to be 53.5%
+
+# Computing the percentage of variation accounted for. Five clusters
+(kmeans5.Laptop <- kmeans(matstd.Laptop,5,nstart = 10))
+perc.var.5 <- round(100*(1 - kmeans5.Laptop$betweenss/kmeans5.Laptop$totss),1)
+names(perc.var.5) <- "Perc. 5 clus"
+perc.var.5
+(kmeans6.Laptop <- kmeans(matstd.Laptop,6,nstart = 10))
+
+#Ans) The cluster-sum of squares is observed to be 48%
+
+# Computing the percentage of variation accounted for. Six clusters
+perc.var.6 <- round(100*(1 - kmeans6.Laptop$betweenss/kmeans6.Laptop$totss),1)
+names(perc.var.6) <- "Perc. 6 clus"
+perc.var.6
+
+#Ans) The cluster-sum of squares is observed to be 43.8%
+
+attributes(perc.var.6)
+Variance_List <- c(perc.var.2,perc.var.3,perc.var.4,perc.var.5,perc.var.6)
+
+Variance_List
+plot(Variance_List)
+
+#Ans) From the graph we can observe that having 4 clusters is optimal, because the graph seems to get flatter after that point
+
+clus1 <- Laptop[kmeans4.Laptop$cluster == 1,]
+colnames(clus1) <- "Cluster 1"
+
+clus2 <- Laptop[kmeans4.Laptop$cluster == 2, ]
+colnames(clus2) <- "Cluster 2"
+
+clus3 <- Laptop[kmeans4.Laptop$cluster == 3, ]
+colnames(clus3) <- "Cluster 3"
+
+clus4 <- Laptop[kmeans4.Laptop$cluster == 4, ]
+colnames(clus4) <- "Cluster 4"
+
+#AnsThe above code creates subsets of the Laptop dataset based on the clusters assigned by the kmeans4.Laptop clustering algorithm. Here's a breakdown of each part:
+#clus1 <- Laptop[kmeans4.Laptop$cluster == 1,]: This line creates a subset of Laptop where the cluster assignment in kmeans4.Laptop is equal to 1. This subset is stored in clus1.
+
+#colnames(clus1) <- "Cluster 1": This line renames the column of clus1 to "Cluster 1". This is useful for identifying which cluster the data in clus1 belongs to.
+
+#Similarly, the next lines create subsets clus2, clus3, and clus4 for clusters 2, 3, and 4 respectively, and rename their columns accordingly.
+
+list(clus1,clus2,clus3,clus4)
+
+
+new_data <- Laptop[, c("Processor_Speed", "RAM_Size", "Storage_Capacity", "Screen_Size", "Weight", "Price")] %>% na.omit() %>% scale()
+
+fviz_nbclust(new_data, kmeans, method = "gap_stat")
+
+#Ans) From the graph it is clear that 2 would be the optimal number of clusters
+
+set.seed(123)
+km.res <- kmeans(new_data, 3, nstart = 25)
+fviz_cluster(km.res, data = new_data,
+             ellipse.type = "convex",
+             palette = "jco",
+             ggtheme = theme_minimal())
+
+#Ans) 3 clusters are formed. Cluster 3 is isolated whereas cluster 1 and 2 are band together closely. Also the size of cluster 3 is smaller compared to cluster 1 and 2
+
+Laptop_pca <- prcomp(Laptop[, c("Processor_Speed", "RAM_Size", "Storage_Capacity", "Screen_Size", "Weight", "Price")])
+Laptop_pca
+summary(Laptop_pca)
+
+PC1 <- Laptop_pca$x[,1]
+PC2 <- Laptop_pca$x[,2]
+
+Laptop_pca_df <- as.data.frame(Laptop_pca$x)
+
+matstd.new_pca <- Laptop_pca_df
+
+res.nbclust <- matstd.new_pca %>% scale() %>% NbClust(distance = "euclidean", min.nc = 2, max.nc = 10, method = "complete", index ="all") 
+
+fviz_nbclust(matstd.new_pca, kmeans, method = "silhouette")
+
+#Ans) Optimal number of clusters would be 3
+
+set.seed(123)
+kmeans3.Laptop_pca <- kmeans(matstd.new_pca, 3, nstart = 25)
+
+kmeans3.Laptop_pca
+
+km.Laptop_pca <- kmeans(matstd.new_pca, 3, nstart =25)
+
+fviz_cluster(km.Laptop_pca, data = matstd.new_pca,
+             ellipse.type = "convex",
+             palette = "jco",
+             ggtheme = theme_minimal())
+
+#Ans) 3 clusters are formed. But compared to the previous cluster we notice that all the 3 clusters are banded closely together. No cluster is isloated from each other as shown in the previous observation and the size of all the 3 clusters are almost equal. 
+
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
