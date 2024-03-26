@@ -1,0 +1,57 @@
+---
+title: "Untitled"
+author: "Tushar"
+date: "2024-03-26"
+output: html_document
+---
+
+```{r}
+# Factor Analysis
+library(psych)
+
+Laptop <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+
+attach(Laptop)
+Laptop[1]
+
+fit.pc <- principal(Laptop[-1], nfactors=3, rotate="varimax")
+fit.pc
+fa.diagram(fit.pc)
+
+#Ans) The parallel analysis tell us that we should have 5 factors. However,  3-factors have been extracted after performing factor analysis. The three factors (RC1, RC2, RC3) explain 48%, 27%, and 24% of the total variance, respectively. Together, they cumulatively explain 100% of the variance in the data.The factor loadings indicate the strength and direction of the relationship between each variable and the factors. Variables with higher absolute loadings on a factor are more strongly associated with that factor. The variables in my dataset are:
+#RC1: Processor_Speed, Storage_Capacity, Screen_Size, Weight, Price
+#RC2: RAM_Size, Screen_Size, Weight
+#RC3: RAM_Size, Storage_Capacity, Weight
+#The root mean square of the residuals (RMSR) is 0.15, indicating a reasonable fit of the model to the data. The fit based on off-diagonal values is 0.68, which is acceptable.
+
+
+
+fit.pc <- principal(Laptop[-1], nfactors=4, rotate="varimax")
+fit.pc
+fa.diagram(fit.pc)
+
+#Ans) From the diagram it is clear that Price and Storage_Capacity go into one group, Screen_size, Weight and Processor_Speed go into the next group and Ram_Size goes seperately into another group. The root mean square of the residuals (RMSR) is 0.12, indicating a good fit of the model to the data. The fit based on off-diagonal values is 0.79, which is also considered good.
+
+fit.pc <- principal(Laptop[-1], nfactors=5, rotate="varimax")
+fit.pc
+fa.diagram(fit.pc)
+
+#Ans)  From the diagram it is clear that only Price and Storage_Capacity go into one group. Ram_sizes goes into one group. Screen_size goes into one group. Weight goes seperately into another group and Processor_Speed also goes seperately into another group.The root mean square of the residuals (RMSR) is 0.12, indicating a good fit of the model to the data. The fit based on off-diagonal values is 0.79, which is also considered good.
+
+for (i in c(1,3,5)) { print(fit.pc$loadings[[1,i]])}
+fit.pc$communality
+#Ans)All variables have very high communalities (close to 1), indicating that the factors explain almost all of the variance in each variable.
+
+fa.parallel(Laptop[-1])
+#Ans) This function will generate a plot showing the eigenvalues from my actual data  and the average eigenvalues from the random data. We can use this plot to determine the number of factors to retain. From the plot it is clear that, it is better to retain one or more factors. 
+
+fa.plot(fit.pc)
+#Ans) A bi-plot is created Each variable will be represented by a vector indicating its loading on each principal component, and each observation will be represented by a point. From the plot we can also see that there is no correlation between the factors
+
+vss(Laptop[-1])
+
+#Ans) This function will generate a plot showing the average correlation of items within factors for different numbers of factors. It can help us determine the optimal number of factors to retain based on the simplicity of the factor structure. Based on the graph it is clear that it is optimal to retain one or more factors.
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
