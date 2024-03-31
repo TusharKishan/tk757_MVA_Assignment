@@ -1,0 +1,82 @@
+---
+title: "Untitled"
+author: "Tushar"
+date: "2024-03-29"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(stats)
+library(cluster)
+library(factoextra)
+library(magrittr)
+library(NbClust)
+library(FactoMineR)
+library(psych)
+
+#PCA Analysi
+social_media <- read_csv("/Users/tusharkishan/Desktop/Multivariate/Project/Social\ Media.csv")
+attach(social_media)
+str(social_media)
+
+data_scaling <- scale(social_media[-1])
+cor(data_scaling)
+
+#Ans)The correlation matrix you provided shows the pairwise correlations between different social media platforms (Instagram, LinkedIn, Snapchat, Twitter, WhatsApp/WeChat, YouTube, OTT, and Reddit), as well as how you felt the entire week.These correlations can provide insights into how different social media platforms are related to each other. For example, if you see a high positive correlation between two platforms, it might suggest that users who are active on one platform are also likely to be active on the other. Conversely, a negative correlation might suggest that users tend to favor one platform over the other. Overall, the correlation matrix helps us understand the relationships between different social media platforms and how they might be related to how you felt during the week.
+
+social_media_pca <- prcomp(social_media[,-1],scale=TRUE)
+social_media_pca
+summary(social_media_pca)
+
+#Ans) The PCA Analysis shows us that the standard deviation of each principal component. The higher the standard deviation, the more important the component is in explaining the variability in the data. The first three PCs explain 60.45% of the variance, which is quite substantial.As we add more components, the cumulative proportion increases, eventually reaching 100% when all components are included.
+
+fviz_eig(social_media_pca, addlabels = TRUE)
+
+#Ans) The graph shows that the sum of first 4 PCs is 72%. Hence first 4 PCs should be considered
+
+biplot(social_media_pca, cex = 0.6, col = c("blue", "red"))
+#Ans) The biplot shows the projections of observations and variables onto the principal components. This helps us to visualize, how each observation and variable contributes to the principal components.Correlation between the variables is reflected by the angle between them. The smaller the angle, the more significant the correlation is.
+
+fviz_pca_var(social_media_pca, col.var = "contrib",
+             gradient.cols = c("#FF0000", "#00FF00", "#0000FF"),
+             repel = TRUE)
+
+#Ans) The above graph gives us a more clear visualization. From this graph it is clear that both Snapchat and Whatsapp/WeChat are more correlated.
+
+res.pca <- PCA(social_media[-1], graph = FALSE)
+
+fviz_pca_biplot(res.pca, repel = TRUE, col.var = "#FC4E07", geom = "text",
+                col.ind = "blue",
+                palette = c("#00AFBB", "#E7B800", "#FC4E07")
+                legend.title = "Variables",
+                )
+
+
+#Ans) From the graph it is clear that I am near the axis. Based on the diagram we can tell that my social media usage is relatively balanced or average compared to the other observations. Being near the zero line means that your scores on the principal component (PC) represented by the first axis are close to the overall average for the dataset.
+
+#Cluster Analysis
+matstd_social_media <- scale(social_media[-1])
+
+fviz_nbclust(matstd_social_media, kmeans, method = "silhouette")
+#Ans) As observed from the graph , the optimal number of clusters to choose would be 2
+
+#K-Means clustering
+set.seed(123)
+km <- kmeans(matstd_social_media, centers = 4)
+fviz_cluster(km, data = matstd_social_media)
+
+#Ans) The graph shows us how students are divided into which cluster. As observed from the graph cluster 1 is an outlier and a seperate cluster. The cluster which I belong to is cluster 3. Cluster 3 has a relatively low social media usage compared to cluster 2 and cluster 4. The people belonging in cluster 2 and cluster 4 have a high social media usage.
+
+#Factor Analysis
+fit.pc <- principal(social_media[-1], nfactors=4, rotate="varimax")
+fit.pc
+fa.diagram(fit.pc)
+
+#Ans) The factor analysis I've conducted explains that each factor explains a certain amount of variance in the data, with RC1 explaining the most variance (30%), followed by RC2 (27%), RC3 (24%), and RC4 (19%).The RMSR (root mean square of residuals) is a measure of how well the model fits the data, with lower values indicating a better fit. In your analysis, the RMSR is 0.1, which is a relatively good fit. Also the graoh shows what apps are students are using together. Also from the graph we can see that Whatsapp/Wechat, Instagram and Youtube are combined together because students might be using it more for to communicate , learn or entertain themselves. OTT, twiiter and Reddit is combined into one, as they are providing entertainment or insights which the student wants. Linkedin and how you felt the entire week is combined into one and snapchat is kept seperately
+
+#Takeaway
+#Ans) The combined findings of PCA, Cluster Analysis, and Factor Analysis demonstrate the diversity of class members' use of social media. There are substantial variances in how people utilize different platforms, which may be classified into diverse behavioral patterns associated with various causes. This study also helps identify certain groups in the class for targeted research or treatments based on their social media behavior, which improves our understanding of common social media usage trends.
+
+```
+
