@@ -1,0 +1,131 @@
+---
+title: "Untitled"
+author: "Tushar"
+date: "2024-04-15"
+output: html_document
+---
+
+```{r}
+library(factoextra)
+library(FactoMineR)
+library(psych)
+library(readr)
+library(GGally)
+
+social_media <- read_csv("/Users/tusharkishan/Desktop/Multivariate/Social\ Media/Social\ Media\ Multiple\ Regression/social_media_cleaned_new.csv")
+
+str(social_media)
+
+#Ans)A summary of responses from 21 individuals regarding their social media usage and various aspects of their week, such as mood, productivity, and sleep patterns. 
+#Social Media Usage: The data includes columns for different social media platforms (e.g., Instagram, LinkedIn, Snapchat, Twitter, etc.) and the average time spent on each platform by the 21 individuals.
+#Other Activities: The data also includes information about other activities, such as job interview calls received, networking done through coffee chats, and learning activities in terms of items created.
+#Mood and Productivity: There is a column indicating whether individuals felt productive during the week, which could be correlated with their social media usage and other activities.
+#Sleep Patterns: The data includes columns related to sleep, such as tiredness upon waking up and trouble falling asleep, both of which could be influenced by social media usage and daily activities.
+
+
+social_media$`Trouble falling asleep_numeric` <- ifelse(social_media$`Trouble falling asleep` == "Yes", 1, 0)
+str(social_media)
+
+#Ans) A new column Trouble falling asleep_numeric is created where the values are 'num' data type
+
+fit <- lm(`Trouble falling asleep_numeric` ~ Instagram + LinkedIn + SnapChat + Twitter + `Whatsapp/Wechat` + youtube + OTT + Reddit, data = social_media)
+summary(fit)
+
+#Ans) The output provides several important pieces of information about the model's performance:
+#Residuals: These are the differences between the observed values of the dependent variable and the values predicted by the model. The summary provides statistics about the distribution of these residuals.
+#Coefficients: These are the estimated coefficients for each independent variable in the model. Each coefficient represents the change in the dependent variable associated with a one-unit change in the corresponding independent variable, holding all other variables constant. The "Estimate" column shows the estimated coefficient value, the "Std. Error" column shows the standard error of the estimate, the "t value" column shows the t-statistic for testing the significance of the coefficient, and the "Pr(>|t|)" column shows the p-value associated with the t-statistic.
+#Residual Standard Error: This is an estimate of the standard deviation of the residuals. It indicates the average amount that the observed values deviate from the predicted values.
+#Multiple R-squared: This is a measure of how well the independent variables explain the variability in the dependent variable. It ranges from 0 to 1, with higher values indicating a better fit.
+#Adjusted R-squared: This is a version of the R-squared value that has been adjusted for the number of independent variables in the model. It penalizes the R-squared value for including unnecessary variables.
+#F-statistic: This is a test statistic for the overall significance of the model. It compares the variability explained by the model to the variability not explained by the model.
+#p-value: This is the p-value associated with the F-statistic. It indicates the probability of obtaining an F-statistic as extreme as the one calculated, assuming that the null hypothesis (that all coefficients are zero) is true. A low p-value indicates that the model is statistically significant.
+
+fit2 <- lm(`Trouble falling asleep_numeric` ~ Instagram + LinkedIn + SnapChat + `Whatsapp/Wechat` + youtube + OTT + Reddit, data = social_media)
+summary(fit2)
+#Ans) The given output from summary(fit) and summary(fit2), it appears that the p-value for the added variable (Twitter) in fit is already above 0.05 (0.799), indicating that Twitter is not a statistically significant predictor in the model fit. Hence we can continue with the 1st model itself
+
+coefficients(fit)
+#Ans) These coefficients represent the estimated effect of each predictor variable on the response variable, holding all other variables constant.
+
+ggpairs(data = social_media, title = "Social Media Usage", cardinality_threshold = 30)
+#Ans) The graph shows us that there is no linear relationship between the columns
+
+confint(fit,level=0.95)
+
+#Ans) The confint function provides the 95% confidence intervals for the coefficients.These intervals give a range of values within which we can be 95% confident that the true population parameter lies for each coefficient.
+
+fitted(fit)
+#Ans) The fitted function provides the fitted values for the multiple regression model fit.Each value in the output corresponds to a fitted value for each observation from my dataset.
+
+residuals(fit)
+#Ans) The residuals function gives you the residuals (the differences between the observed values and the fitted values) for the multiple regression model fit. These residuals indicate how well the model fits the data for each observation.
+
+anova(fit)
+#Ans) The ANOVA table shows the analysis of variance for the regression model fit.The table includes the following columns:
+#Df: Degrees of freedom for each source of variation.
+#Sum Sq: Sum of squares, which measures the total variation explained by each variable or the residuals.
+#Mean Sq: Mean sum of squares, which is the sum of squares divided by its degrees of freedom.
+#F value: The F-statistic, which is a ratio of the mean square for the variable to the mean square of the residuals. It indicates whether there is a significant difference in means between groups (or in this case, whether the variable is a significant predictor of Brand_numeric).
+#Pr(>F): The p-value associated with the F-statistic, which indicates the probability of observing the data if the null hypothesis (that the variable has no effect) is true. Small p-values indicate that the variable is a significant predictor.
+
+vcov(fit)
+#Ans) The variance-covariance matrix for the coefficients in my model fit shows the estimated covariance between each pair of coefficients. This matrix is useful for understanding the uncertainty in your coefficient estimates and for calculating confidence intervals.Each element in the matrix represents the covariance between two coefficients.The diagonal elements of the matrix (from top left to bottom right) represent the variance of each coefficient estimate. The square root of these values gives the standard error of each coefficient estimate. The off-diagonal elements represent the covariance between different coefficient estimates. Positive values indicate that the coefficients tend to vary together, while negative values indicate that they tend to vary in opposite directions.
+
+plot(fit)
+#Ans) The plots play a key role in highlighting important issues and verifying the model's assumptions. They aid in visualizing the degree to which the model matches the data. A good model fit is indicated by random scatter in the residuals vs fitted plot, a straight line in the Q-Q plot, random scatter in the Scale-Location plot, and no influential outliers in the Residuals vs Leverage plot.
+
+r_squared <- summary(fit)$r.squared
+r_squared
+#Ans) Model accuracy is around 49.5%
+
+social_media_numeric <- social_media[, c('Instagram', 'LinkedIn', 'SnapChat', 'Twitter', 'Whatsapp/Wechat', 'youtube', 'OTT', 'Reddit', 'How many job interview calls received in this week.?', 'How much networking done with coffee chats?', 'How many learning done in terms of items created?')]
+
+social_media_pca <- prcomp(social_media_numeric,scale=TRUE)
+social_media_pca
+
+summary(social_media_pca)
+#Ans) The summary of the principal component analysis (PCA) shows the importance of each component:
+#Standard deviation: This indicates the spread of the data along each principal component. Higher values indicate that the component explains more variability in the data.
+#Proportion of Variance: This shows the proportion of the total variance in the data explained by each principal component. Higher values indicate that the component captures more information.
+#Cumulative Proportion: This is the cumulative sum of the proportion of variance explained. It indicates how much of the total variance is explained by the first n components.
+
+
+fviz_eig(social_media_pca, addlabels = TRUE)
+#Ans) The graph shows that the sum of first 4 PCs is 69.7%. Hence first 4 PCs should be considered
+
+PC1 <- social_media_pca$x[, 1]
+PC2 <- social_media_pca$x[, 2]
+PC3 <- social_media_pca$x[, 3]
+PC4 <- social_media_pca$x[, 4]
+
+pc_new <- data.frame(PC1, PC2, PC3, PC4)
+
+pc_new$`Trouble falling asleep_numeric` <- social_media$`Trouble falling asleep_numeric`
+pc_new
+
+fit_new <- lm(`Trouble falling asleep_numeric` ~ PC1 + PC2 + PC3 + PC4, data=pc_new)
+summary(fit_new)
+#Ans) Here's a summary of the model:
+#The intercept term has a coefficient of 0.3333 with a p-value of 0.00837, which is statistically significant.cNone of the principal components (PC1, PC2, PC3, PC4) have coefficients that are statistically significant (p-values are all greater than 0.05). The R-squared value is 0.1149, indicating that the model explains only a small portion of the variance in the "Trouble falling asleep_numeric" variable. Overall, based on this model, the principal components do not appear to be strong predictors of the "Trouble falling asleep_numeric" variable.
+
+fa.parallel(social_media_numeric) 
+
+fit.pc <- principal(social_media_numeric, nfactors=3, rotate="varimax")
+
+round(fit.pc$values, 3)
+fit.pc$loadings
+#Ans) The loadings represent the correlation between each variable and the underlying factor. A higher absolute value of the loading indicates a stronger relationship between the variable and the factor. Variables with loadings close to 1 or -1 are strongly related to the factor. Variables with loadings close to 0 are weakly related to the factor and may not contribute much to it. Loadings that are similar in magnitude across multiple factors indicate that the variable is not clearly associated with any single factor. The SS loadings, Proportion Var, and Cumulative Var provide information about the amount of variance in the data explained by each component and cumulatively by all components.
+
+loadings <- fit.pc$scores[, c("RC1", "RC2", "RC3")]
+loadings_data <- as.data.frame(loadings)
+loadings_data <- round(loadings_data, 3)
+
+loadings_data$`Trouble falling asleep_numeric` <- social_media$`Trouble falling asleep_numeric`
+
+fit_new_1 <- lm(`Trouble falling asleep_numeric`~RC1+RC2+RC3, data=loadings_data)
+summary(fit_new_1)
+
+#Ans) The regression results indicate that none of the regression coefficients for the factors (RC1, RC2, RC3) are statistically significant at conventional levels (p > 0.05). The overall model also does not seem to explain much of the variation in the Trouble falling asleep_numeric variable, as indicated by the low R-squared value and the non-significant F-statistic. This suggests that the factors derived may not be good predictors of the Trouble falling asleep_numeric variable.
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
