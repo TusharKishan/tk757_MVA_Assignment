@@ -1,0 +1,91 @@
+---
+title: "Untitled"
+author: "Tushar"
+date: "2024-04-15"
+output: html_document
+---
+
+```{r}
+library(GGally)
+
+Laptop <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+str(Laptop)
+
+#Ans)This data frame contains information about laptops, with each row representing a different laptop and each column representing a different attribute of the laptops. Here's what each variable represents:
+#Brand: The brand of the laptop (e.g., Asus, Acer, Lenovo).
+#Processor_Speed: The speed of the processor in GHz.
+#RAM_Size: The amount of RAM in gigabytes (GB).
+#Storage_Capacity: The storage capacity of the laptop's hard drive or SSD in gigabytes (GB).
+#Screen_Size: The size of the laptop screen in inches.
+#Weight: The weight of the laptop in kilograms
+#Price: The price of the laptop in the local currency 
+
+Laptop$Brand_numeric <- ifelse(Laptop$Brand == "Acer", 0,
+                          ifelse(Laptop$Brand == "Asus", 1,
+                          ifelse(Laptop$Brand == "Dell", 2,
+                          ifelse(Laptop$Brand == "HP", 3,
+                          ifelse(Laptop$Brand == "Lenovo", 4, NA)))))
+
+
+print(Laptop$Brand_numeric)
+str(Laptop)
+
+#Ans) A new column is created(Brand_numeric) where the Brand values are 'num' data type
+
+fit <- lm(Brand_numeric ~ Processor_Speed + RAM_Size + Storage_Capacity + Screen_Size + Weight + Price, data = Laptop)
+
+summary(fit)
+
+#Ans) The output displays a multiple regression model that predicts the Brand_numeric variable using the Processor_Speed, RAM_Size, Storage_Capacity, Screen_Size, Weight, and Price variables from my dataset. Here's an overview of the important findings:
+#Residuals: These are the differences between the observed values and the predicted values from the model. They are a measure of how well the model fits the data.
+#Coefficients: These are the estimated coefficients for each predictor variable in the model. They represent the estimated effect of each predictor on the response variable. The Estimate column gives the estimated coefficient values, while the Std. Error column gives the standard errors of these estimates.
+#Residual standard error: This is an estimate of the standard deviation of the residuals.
+#Multiple R-squared: This is a measure of how well the model explains the variability in the response variable. It ranges from 0 to 1, with higher values indicating a better fit.
+#Adjusted R-squared: This is similar to the R-squared value but adjusted for the number of predictors in the model. It is often used to compare models with different numbers of predictors.
+#F-statistic: This is a test statistic that tests the overall significance of the model. It compares the fit of the intercept-only model with the fit of the current model.
+#p-value: This is the probability of observing the F-statistic (or more extreme) under the null hypothesis that all the coefficients are zero. A low p-value indicates that the model is statistically significant.
+
+fit2 <- lm(Brand_numeric ~ Processor_Speed + Storage_Capacity + Screen_Size + Weight + Price, data = Laptop)
+
+summary(fit2)
+
+#Ans) There is not much difference compared to the 1st model ('fit'). Hence we can continue with the first model itself
+
+coefficients(fit)
+
+#Ans) The coefficients(fit) function provides the estimated coefficients for each predictor variable in the multiple regression model.These coefficients represent the estimated effect of each predictor variable on the Brand_numeric variable, holding all other variables constant. For example, a one-unit increase in Processor_Speed is associated with a decrease of approximately 0.0877 in the Brand_numeric value, all else being equal. Similarly, a one-unit increase in RAM_Size is associated with an increase of approximately 0.0142 in the Brand_numeric value, all else being equal.
+
+ggpairs(data=Laptop, title="Relationships Between Laptop Specifications for Different Brands")
+
+#Ans)A matrix of scatterplots is created showing the relationship between different laptop specifications for different brands. From the graph it is clear that there is no linear relationship between the columns.
+
+confint(fit,level=0.95)
+
+#Ans) The confint function provides the 95% confidence intervals for the coefficients.These intervals give a range of values within which we can be 95% confident that the true population parameter lies for each coefficient.
+
+fitted(fit)
+#Ans) The fitted function provides the fitted values for the multiple regression model fit.Each value in the output corresponds to a fitted value for each observation from my dataset.
+
+residuals(fit)
+#Ans) The residuals function gives you the residuals (the differences between the observed values and the fitted values) for the multiple regression model fit. These residuals indicate how well the model fits the data for each observation.
+
+anova(fit)
+#Ans) The ANOVA table shows the analysis of variance for the regression model fit.The table includes the following columns:
+#Df: Degrees of freedom for each source of variation.
+#Sum Sq: Sum of squares, which measures the total variation explained by each variable or the residuals.
+#Mean Sq: Mean sum of squares, which is the sum of squares divided by its degrees of freedom.
+#F value: The F-statistic, which is a ratio of the mean square for the variable to the mean square of the residuals. It indicates whether there is a significant difference in means between groups (or in this case, whether the variable is a significant predictor of Brand_numeric).
+#Pr(>F): The p-value associated with the F-statistic, which indicates the probability of observing the data if the null hypothesis (that the variable has no effect) is true. Small p-values indicate that the variable is a significant predictor.
+
+vcov(fit)
+#Ans) The variance-covariance matrix for the coefficients in my model fit shows the estimated covariance between each pair of coefficients. This matrix is useful for understanding the uncertainty in your coefficient estimates and for calculating confidence intervals.Each element in the matrix represents the covariance between two coefficients.The diagonal elements of the matrix (from top left to bottom right) represent the variance of each coefficient estimate. The square root of these values gives the standard error of each coefficient estimate. The off-diagonal elements represent the covariance between different coefficient estimates. Positive values indicate that the coefficients tend to vary together, while negative values indicate that they tend to vary in opposite directions.
+
+plot(fit)
+#Ans) The plots play a key role in highlighting important issues and verifying the model's assumptions. They aid in visualizing the degree to which the model matches the data. A good model fit is indicated by random scatter in the residuals vs fitted plot, a straight line in the Q-Q plot, random scatter in the Scale-Location plot, and no influential outliers in the Residuals vs Leverage plot.
+
+r_squared <- summary(fit)$r.squared
+r_squared
+#Ans) Model accuracy is around 13%.
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
