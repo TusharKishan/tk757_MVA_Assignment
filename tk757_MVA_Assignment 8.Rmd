@@ -1,0 +1,85 @@
+---
+title: "Untitled"
+author: "Tushar"
+date: "2024-04-20"
+output: html_document
+---
+
+```{r}
+library(factoextra)
+library(FactoMineR)
+library(psych)
+library(ggplot2)
+library(cowplot)
+library(caret)
+library(e1071)
+library(pROC)
+
+Laptop <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+str(Laptop)
+
+#Ans)This data frame contains information about laptops, with each row representing a different laptop and each column representing a different attribute of the laptops. Here's what each variable represents:
+#Brand: The brand of the laptop (e.g., Asus, Acer, Lenovo).
+#Processor_Speed: The speed of the processor in GHz.
+#RAM_Size: The amount of RAM in gigabytes (GB).
+#Storage_Capacity: The storage capacity of the laptop's hard drive or SSD in gigabytes (GB).
+#Screen_Size: The size of the laptop screen in inches.
+#Weight: The weight of the laptop in kilograms
+#Price: The price of the laptop in the local currency 
+
+Laptop$Brand_numeric <- ifelse(Laptop$Brand == "Acer", 0,
+                          ifelse(Laptop$Brand == "Asus", 1,
+                          ifelse(Laptop$Brand == "Dell", 2,
+                          ifelse(Laptop$Brand == "HP", 3,
+                          ifelse(Laptop$Brand == "Lenovo", 4, NA)))))
+
+
+print(Laptop$Brand)
+str(Laptop)
+
+Laptop$Brand <- as.factor(Laptop$Brand)
+str(Laptop)
+
+#Ans) To guarantee that R recognizes the category column, our predictor variable, we turn it into components. This transformation results in five levels for the factors.
+
+logistic <- glm(Brand ~ ., data=Laptop, family="binomial")
+summary(logistic)
+
+#Ans) The logistic regression model summary provides estimates for the coefficients of the predictorsand the intercept.Here are some inferences based on the summary:
+#Intercept: The intercept is not statistically significant (p = 0.672), indicating that when all predictors are zero, the log-odds of the response variable being in the "Brand" category is not significantly different from zero.
+#Predictor coefficients: None of the predictor coefficients (Processor_Speed, RAM_Size, Storage_Capacity, Screen_Size, Weight, Price) are statistically significant (all p > 0.05), indicating that these variables do not have a significant impact on the log-odds of the response variable.
+#Deviance: The residual deviance is 186.04 on 195 degrees of freedom, indicating that the model does not fit the data well. A lower deviance value indicates a better fit, but it should be interpreted in comparison to other models.
+#AIC: The AIC (Akaike Information Criterion) is 200.04, which is a measure of the model's goodness of fit. Lower AIC values indicate better fitting models, but it should be compared with other models to determine the best one.
+
+new_data <- data.frame(probability.of.Brand=logistic$fitted.values,Brand=Laptop$Brand)
+new_data_2 <- new_data[order(new_data$probability.of.Brand, decreasing=FALSE),]
+new_data$rank <- 1:nrow(new_data)
+ggplot(data = new_data, aes(x = rank, y = probability.of.Brand)) +
+  geom_point(aes(color = Brand), alpha = 1, shape = 1, stroke = 1) +
+  xlab("Index") +
+  ylab("Predicted probability of Quality")
+
+
+#Ans)A scatter plot of probability.of.Brand against rank is where each point is colored based on the Brand variable.We can determine that the logistic regression assumptions are satisfied if there is no overlap.
+
+data_new <- predict(logistic,newdata=Laptop,type="response" )
+data_new
+
+#Ans) We predict the response variable (Brand) for data stored in the Laptop dataset. The predicted probabilities of each level of the response variable (Brand) for each observation in the Laptop dataset is calculated.
+
+
+data_2 <- factor(ifelse(data_new > 0.5, "Acer", "Not Acer"), levels = levels(Laptop$Brand))
+
+#Ans) The Laptop dataset set has 5 variable brands. I have taken the Brand Acer as my reference brand. This reference choice is arbitrary and doesn't imply that Acer is more important or significant than the other brands; it simply serves as a baseline for comparison. Essentially, the above code categorizes the predicted probabilities into two groups based on whether they exceed the threshold of 0.5, with "Acer" indicating that the probability is high enough to predict an Acer brand and "Not Acer" indicating that it is not.
+
+confusionMatrix(data_2, Laptop$Brand)
+
+#Ans)This confusion matrix shows the classification results of my model compared to the actual laptop brands. The other brands have zero predictions.Here's a breakdown of the confusion matrix:
+#Accuracy: The overall accuracy of the model is 0, which means it is not predicting any brand correctly.
+#Specificity: Specificity is high for all classes except "Acer," which makes sense because the model is only predicting "Acer," resulting in high specificity for other classes (since it's correctly not predicting them).
+#Sensitivity: Sensitivity is not calculated for "Acer" because there are no true positives for "Acer" in the predictions.
+#Kappa: The kappa value is 0, indicating no agreement between the predictions and the actual labels.
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
