@@ -15,6 +15,7 @@ library(klaR)
 Laptop <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
 str(Laptop)
 
+#Model Development 
 r1 <- lda(formula = Brand ~ ., data = Laptop)
 r1
 #Ans) The output predicts aptop brands (Acer, Asus, Dell, HP, Lenovo) based on several features (Processor_Speed, RAM_Size, Storage_Capacity, Screen_Size, Weight, Price).Prior probabilities: These are the estimated probabilities of each brand occurring in the dataset.
@@ -22,10 +23,12 @@ r1
 #Coefficients of linear discriminants: These coefficients are used to linearly combine the features to form the discriminant functions (LD1, LD2, LD3, LD4).
 #Proportion of trace: This indicates the proportion of the total variance explained by each discriminant function. The first discriminant function (LD1) explains 52.91% of the variance, the second (LD2) explains 30.94%, the third (LD3) explains 15.46%, and the fourth (LD4) explains 0.70%.
 
+#finding out the in-between group variance of the linear discriminants
 r2 <- lda(formula = Brand ~ ., data = Laptop, CV=TRUE)
 r2
 #Ans) The class column shows the predicted class for each observation, and the posterior columns show the posterior probabilities for each class. Each row corresponds to an observation, and each column corresponds to a class.These probabilities represent the model's confidence in each class prediction for that observation.
 
+#Performing LDA with training sample
 train <- sample(1:500, 95)
 r3 <- lda(Brand ~ ., data = Laptop, prior = c(0.2, 0.2, 0.2, 0.2, 0.2), subset = train)
 r3
@@ -35,6 +38,8 @@ r3
 #Coefficients of Linear Discriminants: These coefficients are used to construct linear combinations of the predictor variables that best separate the classes. They indicate the importance of each predictor in the classification.
 #Proportion of Trace: This shows the proportion of total variance in the data explained by each linear discriminant. In this case, LD1 explains 58.6% of the variance, LD2 explains 30.9%, LD3 explains 7.9%, and LD4 explains 2.5%.
 
+
+#Making Predictions
 llda1 = predict(object = r3, newdata = Laptop[-train, ])
 head(llda1$class)
 
@@ -47,12 +52,15 @@ head(llda1$posterior, 50)
 head(llda1$x, 3)
 #Ans) The llda1$x output shows the values of the linear discriminants (LD) for each observation in the test set. These values are essentially the coordinates of each observation in the LD space, which is a lower-dimensional space created by the LDA model to separate the classes.In my output each row represents an observation, and each column represents a different LD. For example, the first row shows the LD values for the first observation, where LD1 is -1.272716, LD2 is -1.6090542, LD3 is -1.4632172, and LD4 is 1.7946536. These LD values can be used to visualize the separation of classes in the LD space or for further analysis of the data.
 
+#Plotting Residuals
 plot(r1)
 #Ans) We observe that there is a lot of overlap between the residuals
 
 plot(r3)
 #Ans) The overlap is way lesser compared to the previous plot
 
+
+#Visualization
 sample1 <- sample(c(TRUE, FALSE), nrow(Laptop), replace = T, prob = c(0.75,0.25))
 train1 <- Laptop[sample1, ]
 test1 <- Laptop[!sample1, ]
@@ -64,10 +72,12 @@ lda.Laptop <- lda(Brand ~ ., train1)
 plot(lda.Laptop, col = as.integer(train1$Brand))
 #Ans) There is a lot of overlap between the residuals
 
+
+#Accuracy
 lda.train1 <- predict(lda.Laptop)
 train1$lda <- lda.train1$class
 table(train1$lda,train1$Storage_Capacity)
-#Ans) We have predecited the brand's of the Laptop based on its Storage Capacity.The accuracy of the model is not great on the training data
+#Ans)The accuracy of the model is not great on the training data
 
 lda.test1 <- predict(lda.Laptop,test1)
 test1$lda <- lda.test1$class
