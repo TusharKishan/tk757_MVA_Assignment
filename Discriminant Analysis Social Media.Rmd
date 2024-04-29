@@ -31,6 +31,7 @@ social_media_2$`Trouble.falling.asleep` <- ifelse(social_media_2$`Trouble.fallin
 
 social_media_2[is.na(social_media_2)] <- mean(social_media_2, na.rm = TRUE)
 
+#Model Development 
 r <- lda(formula = `Trouble.falling.asleep` ~ ., data = social_media_2)
 r
 
@@ -42,6 +43,8 @@ r
 #LD1: This is the first linear discriminant function. It's a linear combination of the predictor variables that maximally separates the groups (No, Yes) based on Trouble falling asleep.
 #Overall, LDA is used to find a linear combination of variables that best separates two or more classes in my data. The output provides information on how each predictor variable contributes to this separation.
 
+
+#finding out the in-between group variance of the linear discriminants
 r2 <- lda(formula = `Trouble.falling.asleep` ~ ., data = social_media_2, CV=TRUE)
 r2
 
@@ -54,6 +57,8 @@ r2
 #$xlevels: This section shows the levels of the categorical variables used in the LDA model. For example, Mood Productivity has levels No and Yes, and Tired waking up in morning has levels No and Yes.
 #Overall, LDA is used to find a linear combination of variables that best separates two or more classes in my data. The output provides information on how each predictor variable contributes to this separation.
 
+
+#Performing LDA with training sample
 train <- sample(1:15, 10)
 r3 <- lda(`Trouble.falling.asleep` ~ ., 
           social_media_2,
@@ -66,31 +71,24 @@ r3
 #Coefficients of linear discriminants (LD1): These coefficients are used to transform the predictor variables into a new space where the groups are most separable. Each coefficient corresponds to a predictor variable and indicates the importance of that variable in determining the group.
 
 
+#Making Predictions
 llda <- predict(object = r3, newdata = social_media_2[-train, ])
 head(llda$class)
 
 head(llda$posterior, 6)
-#Ans) Here's a breakdown for the first few rows:
-
-#Observation 1: Highly likely "No" (0.9999915) and very unlikely "Yes" (8.485730e-06).
-#Observation 2: Likely "Yes" (0.9846556) and unlikely "No" (0.0153444).
-#Observation 3: Highly likely "No" (0.9997795) and very unlikely "Yes" (0.0002205493).
-#Observation 4: Likely "No" (0.9310796) but somewhat likely "Yes" (0.06892039).
-#Observation 5: Likely "Yes" (0.6461887) but somewhat likely "No" (0.3538113).
-#Observation 6: Likely "No" (0.7645492) but somewhat likely "Yes" (0.2354508).
 
 head(llda$x, 3)
-#Ans) The llda$x output shows the linear discriminants (LD) for each observation. In this case, there is only one discriminant (LD1). Each row corresponds to an observation, and the value in the LD1 column represents the position of that observation along the LD1 axis. For example, for the first three observations:
+#Ans) The llda$x output shows the linear discriminants (LD) for each observation. In this case, there is only one discriminant (LD1). Each row corresponds to an observation, and the value in the LD1 column represents the position of that observation along the LD1 axis. 
 
-#Observation 1: LD1 value is -4.431692.
-#Observation 2: LD1 value is 1.579386.
-#Observation 3: LD1 value is -3.195238.
 
+#Plotting Residuals
 plot(r)
 
 plot(r3)
 #Ans) All the observations are in one line and there is no overlap. 
 
+
+#Visualization
 training_sample <- sample(c(TRUE, FALSE), nrow(social_media_2), replace = T, prob = c(0.6,0.4))
 train <- social_media_2[training_sample, ]
 test <- social_media_2[!training_sample, ]
@@ -100,6 +98,7 @@ lda.social_media <- lda(`Trouble.falling.asleep`~ ., train)
 plot(lda.social_media, col = as.integer(train$`Trouble.falling.asleep`))
 #Ans) There. is no overlap
 
+#Accuracy
 lda.train <- predict(lda.social_media)
 train$lda <- lda.train$class
 table(train$lda,train$`Trouble.falling.asleep`)
