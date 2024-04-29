@@ -1,0 +1,109 @@
+---
+title: "Untitled"
+author: "Tushar"
+date: "2024-04-28"
+output: html_document
+---
+
+```{r}
+library(MASS)
+library(ggplot2)
+library(memisc)
+library(ROCR)
+library(dplyr)
+library(klaR)
+
+
+social_media <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Social\ Media/Social\ Media\ LDA/social_media_cleaned_new.csv")
+str(social_media)
+
+social_media_2 <- social_media[, c("Instagram", "LinkedIn", "SnapChat", "Twitter", "Whatsapp.Wechat", "youtube", "OTT", "Reddit", "Trouble.falling.asleep")]
+
+#Ans)A summary of responses from 21 individuals regarding their social media usage and various aspects of their week, such as mood, productivity, and sleep patterns. 
+#Social Media Usage: The data includes columns for different social media platforms (e.g., Instagram, LinkedIn, Snapchat, Twitter, etc.) and the average time spent on each platform by the 21 individuals.
+#Other Activities: The data also includes information about other activities, such as job interview calls received, networking done through coffee chats, and learning activities in terms of items created.
+#Mood and Productivity: There is a column indicating whether individuals felt productive during the week, which could be correlated with their social media usage and other activities.
+#Sleep Patterns: The data includes columns related to sleep, such as tiredness upon waking up and trouble falling asleep, both of which could be influenced by social media usage and daily activities.
+
+
+social_media_2[social_media_2 == "?"] <- NA
+social_media_2$`Trouble.falling.asleep` <- ifelse(social_media_2$`Trouble.falling.asleep` == "Yes", yes = "Yes", no = "No")
+
+social_media_2[is.na(social_media_2)] <- mean(social_media_2, na.rm = TRUE)
+
+r <- lda(formula = `Trouble.falling.asleep` ~ ., data = social_media_2)
+r
+
+#Ans) Here's a brief explanation of the output:
+
+#Prior Probabilities of Groups: These are the estimated probabilities of belonging to each group (No, Yes) based on the class variable (Trouble falling asleep).
+#Group Means: These are the mean values of each predictor variable (characteristics of social media usage) for each group (No, Yes). These values indicate the average level of each variable for each group.
+#Coefficients of Linear Discriminants (LD): These coefficients are used to calculate the linear combination of predictors that forms the LD functions. The LD functions are used to classify observations into groups.
+#LD1: This is the first linear discriminant function. It's a linear combination of the predictor variables that maximally separates the groups (No, Yes) based on Trouble falling asleep.
+#Overall, LDA is used to find a linear combination of variables that best separates two or more classes in my data. The output provides information on how each predictor variable contributes to this separation.
+
+r2 <- lda(formula = `Trouble.falling.asleep` ~ ., data = social_media_2, CV=TRUE)
+r2
+
+#Ans) Here's a brief explanation of the output:
+
+#Class: This shows the predicted class for each observation based on the LDA model.
+#Posterior: This matrix shows the posterior probabilities of each observation belonging to each class. In my output, NaN values indicate cases where the model cannot provide a valid posterior probability due to the data distribution.
+#Terms: This section shows the formula used for the LDA model (Trouble falling asleep ~ .), which means predicting Trouble falling asleep based on all other variables in the dataset.
+#Coefficients of Linear Discriminants (LD): These coefficients are used to calculate the linear combination of predictors that form the LD functions. These functions are used to classify observations into groups.
+#$xlevels: This section shows the levels of the categorical variables used in the LDA model. For example, Mood Productivity has levels No and Yes, and Tired waking up in morning has levels No and Yes.
+#Overall, LDA is used to find a linear combination of variables that best separates two or more classes in my data. The output provides information on how each predictor variable contributes to this separation.
+
+train <- sample(1:15, 10)
+r3 <- lda(`Trouble.falling.asleep` ~ ., 
+          social_media_2,
+          prior = c(0.5,0.5),
+          subset = train)
+r3
+#Ans) Here's a summary of my findings
+#Prior probabilities of groups: The model assumes equal prior probabilities for both classes: "No" and "Yes" for "Trouble falling asleep," with each having a prior probability of 0.5.
+#Group means: For each group (No/Yes), the model provides the mean values for the predictor variables. For example, the mean value of charactertl868 for the "No" group is 0.0, while for the "Yes" group, it is 0.5.
+#Coefficients of linear discriminants (LD1): These coefficients are used to transform the predictor variables into a new space where the groups are most separable. Each coefficient corresponds to a predictor variable and indicates the importance of that variable in determining the group.
+
+
+llda <- predict(object = r3, newdata = social_media_2[-train, ])
+head(llda$class)
+
+head(llda$posterior, 6)
+#Ans) Here's a breakdown for the first few rows:
+
+#Observation 1: Highly likely "No" (0.9999915) and very unlikely "Yes" (8.485730e-06).
+#Observation 2: Likely "Yes" (0.9846556) and unlikely "No" (0.0153444).
+#Observation 3: Highly likely "No" (0.9997795) and very unlikely "Yes" (0.0002205493).
+#Observation 4: Likely "No" (0.9310796) but somewhat likely "Yes" (0.06892039).
+#Observation 5: Likely "Yes" (0.6461887) but somewhat likely "No" (0.3538113).
+#Observation 6: Likely "No" (0.7645492) but somewhat likely "Yes" (0.2354508).
+
+head(llda$x, 3)
+#Ans) The llda$x output shows the linear discriminants (LD) for each observation. In this case, there is only one discriminant (LD1). Each row corresponds to an observation, and the value in the LD1 column represents the position of that observation along the LD1 axis. For example, for the first three observations:
+
+#Observation 1: LD1 value is -4.431692.
+#Observation 2: LD1 value is 1.579386.
+#Observation 3: LD1 value is -3.195238.
+
+plot(r)
+
+plot(r3)
+#Ans) All the observations are in one line and there is no overlap. 
+
+training_sample <- sample(c(TRUE, FALSE), nrow(social_media_2), replace = T, prob = c(0.6,0.4))
+train <- social_media_2[training_sample, ]
+test <- social_media_2[!training_sample, ]
+social_media_2[is.na(social_media_2)] <- mean(social_media_2, na.rm = TRUE)
+lda.social_media <- lda(`Trouble.falling.asleep`~ ., train)
+
+plot(lda.social_media, col = as.integer(train$`Trouble.falling.asleep`))
+#Ans) There. is no overlap
+
+lda.train <- predict(lda.social_media)
+train$lda <- lda.train$class
+table(train$lda,train$`Trouble.falling.asleep`)
+#Ans) Accuracy of the model is excellent
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
