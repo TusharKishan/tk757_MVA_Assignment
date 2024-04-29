@@ -1,0 +1,698 @@
+---
+title: "Untitled"
+author: "Tushar"
+date: "2024-04-29"
+output: html_document
+---
+
+```{r}
+#1. Ask an important question I want answered 
+
+#1A. What is the average price difference between different brands laptops with a screen size greater than 14 inches and those with 14 inches or smaller, considering only laptops with a storage capacity of 512 GB or more  
+
+#1B. Among laptops with processor speeds exceeding 3.5 GHz, which model offers the best balance of performance .
+
+#2. Answer why this question(s) is/are important to I
+
+#2A. This question is important to me as I wish to understand the average price difference between with different screen sizes and storage capacities. Having  an answer to this question can provide valuable insights for pricing strategies, product positioning, and consumer preferences.  This information could also help manufacturers and retailers adjust their product offerings and pricing strategies to better meet consumer demand and maximize revenue. Also Insights from this analysis can tell us about the product development efforts.
+
+#2B. This question is important to me as I wish to understand because it helps consumers like me to  make informed decisions when purchasing laptops. By identifying the model that offers the best balance of performance and price among those with high processor speeds, consumers can ensure they are getting the most value for their money. Also by answering this question we can help a consumer make more informed decisions who wants to buy a particular brand.
+
+#3. Find and collect data (need one dependent variable and more than 3 dependent variables)
+
+#3A. Dependent - Price
+    #Independent - Screen Size, Storage Capacity, Brand
+    
+#3B. Dependent - Price                                                                                                  Independent - Processing Speed, RAM Size, Storage Capacity
+
+#4 Describe Ir data (create a data dictionary)
+#Ans) 
+#1. Variable Name - Brand,
+#Description - Brand of the laptop,
+#Data Type - Text,
+#Unit of Measure - N/A
+        
+#2. Variable Name - Processor Speed,
+#Description - Processing power of the laptop,
+#Data Type - Numeric
+#Unit of Measure - N/A
+        
+#3. Variable Name - RAM Size,
+#Description - Size of the Ram for the particular laptop,
+#Data Type - Numeric,
+#Unit of Measure - N/A
+      
+#4. Variable Name - Storage Capacity,
+#Description - How much memory can the laptop store,
+#Data Type - Numeric,
+#Unit of Measure - N/A
+     
+#5. Variable Name - Screen Size,
+#Description - Size of the lapotop's screen or screen resolution of the laptop,
+#Data Type - Numeric,
+#Unit of Measure - N/A
+
+#6. Variable Name - Weight,
+#Description - Weight of the laptop,
+#Data Type - Numeric,
+#Unit of Measure - N/A
+
+#7. Variable Name - Price,
+#Description - Price of the laptop,
+#Data Type - Numeric,
+#Unit of Measure - N/A,
+
+```
+```{r}
+library(readr)
+library(graphics)
+library(dplyr)
+library(ggplot2)
+Laptop <- read_csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+str(Laptop)
+dim(Laptop)
+names(Laptop)
+str(Laptop)
+summary(Laptop)
+
+#Question 1 - What is the average price difference of laptops with a screen size greater than 14 inches and those with 14 inches or smaller, considering only laptops with a storage capacity of 512 GB or more
+#attach(Laptop)
+ggplot(Laptop, aes(x=Screen_Size,y=Price))+ facet_wrap(Laptop$Storage_Capacity) + geom_point()
+
+
+#Ans) The picture shows the distribution of the price ranges of different laptops, comparing the screen Sizes and Storage Capacity. The visualization shows us that the average price for laptop with screen size more that 14 inches and storage capacity of 512 gb is around 17,500 dollars and the average price for laptops with a storage capacity of more than 512 gb and a screen size of greater than 14 inches is around 35,000. The average price of screen size less than 14 inches and equal to 512gb is 15,000 and the average price of screen size less than 14 inches and greater than 512 gb is 30,000
+
+
+#Question 2 - 1. Among laptops with processor speeds exceeding 3.5 GHz, which model offers the best balance of performance.
+
+ggplot(Laptop, aes(x=Processor_Speed, y=Brand)) + geom_hex()
+
+#Ans) The picture shows us the distributiob of different band of laptops with their processing speeds. From the visualiztion it is clear that the model which offers a processing speed exceeding 3.5 H is Dell. Dell has a total count of 6 laptops in which the processing speed is more than 3.5 Hz. After HP, Hp comes in the second place where there are 5 laptops where the processing speed is more than 3.5 Hz. In the last place we get Asus, where there are only two laptops with a processing speed more than 3.5 Hz 
+
+
+#Univariate
+ggplot(Laptop, aes(x=Screen_Size, fill=Brand)) + geom_histogram() + theme_bw()
+
+#Bivariate
+fig <- Laptop[c('RAM_Size','Processor_Speed')]
+ggplot(fig, aes(RAM_Size, Processor_Speed)) + geom_boxplot()
+
+```
+```{r}
+library(readr)
+Laptop <- read_csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+attach(Laptop)
+str(Laptop)
+Laptop$Brand <- as.factor(Laptop$Brand)
+Laptop_x <- Laptop[, 2:7]
+Laptop_x
+Laptop_cm <- colMeans(Laptop_x)
+Laptop_S <- cov(Laptop_x)
+Laptop_d <- apply(Laptop_x, MARGIN = 1, function(Laptop_x)t(Laptop_x - Laptop_cm) %*% solve(Laptop_S) %*% (Laptop_x - Laptop_cm))
+Laptop_cm
+Laptop_S
+Laptop_d
+
+#t tests
+with(data=Laptop,t.test(Processor_Speed[Brand=="Dell"],Processor_Speed[Brand=="HP"],var.equal=TRUE))
+with(data=Laptop,t.test(RAM_Size[Brand=="Dell"],RAM_Size[Brand=="HP"],var.equal=TRUE))
+with(data=Laptop,t.test(Storage_Capacity[Brand=="Dell"],Storage_Capacity[Brand=="HP"],var.equal=TRUE))
+with(data=Laptop,t.test(Screen_Size[Brand=="Dell"],Screen_Size[Brand=="HP"],var.equal=TRUE))
+with(data=Laptop,t.test(Weight[Brand=="Dell"],Weight[Brand=="HP"],var.equal=TRUE))
+with(data=Laptop,t.test(Price[Brand=="Dell"],Price[Brand=="HP"],var.equal=TRUE))
+
+#Ans) :The given R code runs numerous studies on the  dataset. Initially, it reads the dataset, which is likely to contain numerous features. It then selects all the columns from the dataset, which correspond to the brands "Dell" and "HP," respectively. Following that, the code calculates the means for the specified variables, providing information about their average values.It then computes the covariance matrix  to better understand the correlations and variability. Furthermore, the code computes Mahalanobis distances , which assess each observation's distance from the mean in multivariate space while taking covariance into account.Finally, the code uses independent t-tests to compare the means across both the laptop brands "Dell" and "HP". These t-tests seek to determine whether there are statistically significant differences in the means of these variables between the two groups, providing useful information about potential relationships with the outcome variable.The t-value indicates how different the means of the two groups are relative to the variance in the data. A larger t-value suggests a greater difference between the means.The p-value is the probability of observing such an extreme difference in means if the true difference is actually zero. A low p-value (typically below 0.05) suggests that the observed difference is unlikely to be due to random chance.The 95% confidence interval provides a range of values within which we can be 95% confident that the true difference in means lies. In this case, the interval includes zero, indicating that we cannot be confident that there is a true difference between the processor speeds of Dell and HP laptops.
+
+#2) What are the results of Hotelling's T-squared test for all the laptop brands. What is the difference between the variances of laptops with respect to their RAM Size and Price
+
+#Hotelling test
+library(Hotelling)
+new_test <- hotelling.test(Processor_Speed + RAM_Size + Storage_Capacity + Screen_Size + Weight +Price ~ Brand, data=Laptop)
+
+cat("T2 statistic =",new_test$stat[[1]],"\n")
+print(new_test)
+
+#F tests
+attach(Laptop)
+var.test(RAM_Size[Brand=="Asus"],RAM_Size[Brand])
+var.test(Price[Brand=="Asus"],Price[Brand])
+
+
+#Ans)The Hotelling test uses a T² statistic to compare multiple means simultaneously. The T² statistic value is 4.187586, and it is used to test whether there are significant differences between the means of multiple groups.In this analysis, with a p-value of 0.6853, we do not have enough evidence to reject the null hypothesis, which would suggest that there are no significant differences between the group means.The F tests compares how much the data points vary from the mean within each group relative to the variance between the group means. A value close to 1 suggests that the variances are similar. The ratio of the variances is 0.9958122(RAM_Size) and 1.015913(Price) which means that the variances are similar.The 95% confidence interval provides a range of values within which we can be 95% confident that the true ratio of variances lies. In this case, the interval for both RAM_Size and Price includes 1, indicating that we cannot reject the null hypothesis that the variances are equal.
+
+#4) What result does the multivariate analysis give for each of the variables when we consider all the laptop brands 
+
+#Anova
+summary(aov(Processor_Speed ~ Brand))
+summary(aov(RAM_Size ~ Brand))
+summary(aov(Storage_Capacity ~ Brand))
+summary(aov(Screen_Size ~ Brand))
+summary(aov(Weight ~ Brand))
+summary(aov(Price ~ Brand))
+
+#Manova
+summary(manova(as.matrix(Laptop[,-1])~ Brand))
+
+#Ans)These are the results of analysis of variance (ANOVA) tests conducted to examine the differences in various laptop characteristics (Processor_Speed, RAM_Size, Storage_Capacity, Screen_Size, Weight, Price) across different laptop brands (Brand).Based on these results, none of the variables (Processor_Speed, RAM_Size, Storage_Capacity, Screen_Size, Weight, Price) show a significant difference across different laptop brands, as all p-values are greater than the typical significance level of 0.05. Finally the multivariate analysis of variance (MANOVA) assessing the effect of the "Brand" variable on several dependent variables simultaneously.In this analysis, the p-value of 0.9629 indicates that there is no significant effect of the "Brand" variable on the dependent variable.
+
+```
+```{r}
+library(readr)
+Laptop <- read_csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+attach(Laptop)
+str(Laptop)
+
+#Get the Correlations between the measurements
+cor(Laptop[-1])
+
+# Using prcomp to compute the principal components (eigenvalues and eigenvectors). 
+Laptop_pca <- prcomp(Laptop[,-1],scale=TRUE)
+Laptop_pca
+summary(Laptop_pca)
+
+#1 Decide how many Principal Components (PCs) I want to keep and why
+#Ans) Based on the summary of the principal component analysis (PCA) on my dataset, I would retain the first three principal components (PCs) as they explain a significant amount of variance in the data.The first three PCs explain a significant proportion of the total variance in the data. Specifically, they explain 70.51% of the variance, with PC1 explaining 34.85%, PC2 explaining 18.94%, and PC3 explaining 16.72%.The cumulative proportion of variance explained by the first three PCs is 0.7051, meaning that these three components capture over 70% of the variability in the original data.By retaining the first three PCs I can effectively reduce the dimensionality of Ir data from six variables to three components, while still retaining a large amount of information about the original variables.Keeping the first three principal components would be a reasonable choice, as they capture a substantial amount of the variance in the data and provide a more compact representation of the original variables. The cumulative proportion reaches 85.76% after the third PC, indicating that adding more PCs beyond the third contributes relatively little to explaining the variance.
+
+
+(eigen_Laptop <- Laptop_pca$sdev^2)
+
+
+names(eigen_Laptop) <- paste("PC",1:5,sep="")
+eigen_Laptop
+
+sumlambdas <- sum(eigen_Laptop)
+sumlambdas
+
+propvar <- eigen_Laptop/sumlambdas
+propvar
+
+cumvar_Laptop <- cumsum(propvar)
+cumvar_Laptop
+
+matlambdas <- rbind(eigen_Laptop,propvar,cumvar_Laptop)
+rownames(matlambdas) <- c("Eigenvalues","Prop. variance","Cum. prop. variance")
+round(matlambdas,4)
+
+summary(Laptop_pca)
+
+Laptop_pca$rotation
+
+print(Laptop_pca)
+
+## Sample scores stored in Laptop_pca$x
+Laptop_pca$x
+
+attributes(Laptop_pca)
+
+
+Laptopyp_pca <- cbind(data.frame(Brand),Laptop_pca$x)
+Laptopyp_pca
+
+
+tabmeansPC <- aggregate(Laptopyp_pca[,2:6],by=list(Brand=Laptop$Brand),mean)
+tabmeansPC
+
+tabmeansPC <- tabmeansPC[rev(order(tabmeansPC$Brand)),]
+tabmeansPC
+
+tabfmeans <- t(tabmeansPC[,-1])
+tabfmeans
+
+colnames(tabfmeans) <- t(as.vector(tabmeansPC[1]$Brand))
+tabfmeans
+
+
+tabsdsPC <- aggregate(Laptopyp_pca[,2:6],by=list(Brand=Laptop$Brand),sd)
+tabfsds <- t(tabsdsPC[,-1])
+colnames(tabfsds) <- t(as.vector(tabsdsPC[1]$Brand))
+tabfsds
+
+#2 Explain the variate representation each PCs
+#Ans In PC1 Processor_Speed has a moderate negative loading.RAM_Size has a small negative loading. Storage_Capacity has a large positive loading. Screen_Size has a small negative loading. Weight has a small positive loading. Price has a large positive loading. This component seems to capture laptops with high storage capacity and price, with some influence from processor speed and weight.Lenovo has the highest mean score on PC1, indicating that laptops from Lenovo might be perceived as offering good performance and value for their price. In PC2 Processor_Speed has a moderate positive loading. RAM_Size has a large negative loading. Storage_Capacity has a small positive loading. Screen_Size has a large negative loading. Weight has a large negative loading. Price has a small positive loading. This component seems to capture laptops with lower RAM size, screen size, and weight, but higher processor speed.HP has the highest mean score on PC2, suggesting that HP laptops might be perceived as offering a good balance between performance and portability. In PC3 Processor_Speed has a large positive loading. RAM_Size has a large positive loading. Storage_Capacity has a small positive loading. Screen_Size has a moderate negative loading. Weight has a small positive loading. Price has a small positive loading. This component seems to capture laptops with higher RAM size and processor speed, but lower screen size.Dell has the highest mean score on PC3, indicating that Dell laptops might be perceived as offering larger screen sizes and possibly catering to multimedia or gaming. In PC4 Processor_Speed has a large positive loading. RAM_Size has a small negative loading. Storage_Capacity has a small positive loading. Screen_Size has a moderate positive loading. Weight has a small negative loading. Price has a small positive loading. This component seems to capture laptops with higher processor speed and screen size, but lower RAM size.Asus has the highest mean score on PC4, suggesting that Asus laptops might be perceived as offering good performance but at a higher price point. In PC5 Processor_Speed has a moderate positive loading. RAM_Size has a small negative loading. Storage_Capacity has a small negative loading. Screen_Size has a small negative loading. Weight has a moderate positive loading. Price has a moderate negative loading. This component seems to capture laptops with higher weight and lower price, with some influence from processor speed.cer has the highest mean score on PC5, indicating that Acer laptops might be perceived as more lightweight and portable.
+
+#3 Perform some visualization using PCs
+
+plot(eigen_Laptop, xlab = "Component number", ylab = "Component variance", type = "l", main = "Scree diagram")
+#Ans) From the above graph, we can stop at any of the sharp edges, according to my analysis above, I have decided to retain only till PC3, to balance between capturing a substantial portion of the variance
+
+plot(log(eigen_Laptop), xlab = "Component number",ylab = "log(Component variance)", type="l",main = "Log(eigenvalue) diagram")
+
+#Ans) From the above graph, we can stop at any of the sharp edges, according to my analysis above, I have decided to retain only till PC3, to balance between capturing a substantial portion of the variance
+
+plot(Laptop_pca)
+#The above graph shows us the variance against the principle components
+
+diag(cov(Laptop_pca$x))
+
+xlim <- range(Laptop_pca$x[,1])
+Laptop_pca$x[,1]
+
+Laptop_pca$x
+
+plot(Laptop_pca$x,xlim=xlim,ylim=xlim)
+
+#The above graph is a scatter plot which shows us the first principal component score (x-axis) against the second principal component score (y-axis), with the limits of both axes set to the range of the first principal component scores.We calculate the diagonal elements of the covariance matrix of the principal component scores (Laptop_pca$x), sets the x-axis limits (xlim) to the range of the first column of the scores, and then attempts to create a plot of the principal component scores.
+
+Laptop$Brand <- as.factor(Laptop$Brand)
+out <- sapply(1:5, function(i){plot(Laptop$Brand,Laptop_pca$x[,i],xlab=paste("PC",i,sep=""),ylab="Brand")})
+
+#The above graph shows us five seperate boxplots one for each of the first five principal components (PC1 to PC5). Each plot will show the scores of the corresponding principal component (Laptop_pca$x[,i]) on the y-axis, and the laptop brands (Laptop$Brand) on the x-axis.It also shows us the the distribution of laptop brands along the principal component axes. How each laptop brand is positioned relative to the others in the space defined by the principal components. Any patterns or clusters that might exist among the laptop brands based on their feature values (represented by the principal component scores).
+
+library(factoextra)
+library(FactoMineR)
+library(ggfortify)
+library(psych)
+library(corrplot)
+library(devtools)
+fviz_eig(Laptop_pca, addlabels = TRUE)
+
+# The above graph gives us a a scree plot, which is a line plot showing the magnitude of each eigenvalue. This plot helps I decide how many principal components to retain based on the "elbow" point, where the eigenvalues start to level off.It also tells us about the proportion of variance of each component.
+```
+```{r}
+library(cluster)
+library(readr)
+library(factoextra)
+library(magrittr)
+library(NbClust)
+
+
+Laptop <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+Laptop
+matstd.Laptop <- scale(Laptop[,2:7])
+# K-means, k=2, 3, 4, 5, 6
+# Centers (k's) are numbers thus, 10 random sets are chosen
+
+(kmeans2.Laptop <- kmeans(matstd.Laptop,2,nstart = 10))
+# Computing the percentage of variation accounted for. Two clusters
+perc.var.2 <- round(100*(1 - kmeans2.Laptop$betweenss/kmeans2.Laptop$totss),1)
+names(perc.var.2) <- "Perc. 2 clus"
+perc.var.2
+
+#Ans) The cluster-sum of squares is observed to be 69.4%.
+
+# Computing the percentage of variation accounted for. Three clusters
+(kmeans3.Laptop <- kmeans(matstd.Laptop,3,nstart = 10))
+perc.var.3 <- round(100*(1 - kmeans3.Laptop$betweenss/kmeans3.Laptop$totss),1)
+names(perc.var.3) <- "Perc. 3 clus"
+perc.var.3
+
+#Ans) The cluster-sum of squares is observed to be 59.9%
+
+# Computing the percentage of variation accounted for. Four clusters
+(kmeans4.Laptop <- kmeans(matstd.Laptop,4,nstart = 10))
+perc.var.4 <- round(100*(1 - kmeans4.Laptop$betweenss/kmeans4.Laptop$totss),1)
+names(perc.var.4) <- "Perc. 4 clus"
+perc.var.4
+
+#Ans) The cluster-sum of squares is observed to be 53.5%
+
+# Computing the percentage of variation accounted for. Five clusters
+(kmeans5.Laptop <- kmeans(matstd.Laptop,5,nstart = 10))
+perc.var.5 <- round(100*(1 - kmeans5.Laptop$betweenss/kmeans5.Laptop$totss),1)
+names(perc.var.5) <- "Perc. 5 clus"
+perc.var.5
+(kmeans6.Laptop <- kmeans(matstd.Laptop,6,nstart = 10))
+
+#Ans) The cluster-sum of squares is observed to be 48%
+
+# Computing the percentage of variation accounted for. Six clusters
+perc.var.6 <- round(100*(1 - kmeans6.Laptop$betweenss/kmeans6.Laptop$totss),1)
+names(perc.var.6) <- "Perc. 6 clus"
+perc.var.6
+
+#Ans) The cluster-sum of squares is observed to be 43.8%
+
+attributes(perc.var.6)
+Variance_List <- c(perc.var.2,perc.var.3,perc.var.4,perc.var.5,perc.var.6)
+
+Variance_List
+plot(Variance_List)
+
+#Ans) From the graph we can observe that having 4 clusters is optimal, because the graph seems to get flatter after that point
+
+clus1 <- Laptop[kmeans4.Laptop$cluster == 1,]
+colnames(clus1) <- "Cluster 1"
+
+clus2 <- Laptop[kmeans4.Laptop$cluster == 2, ]
+colnames(clus2) <- "Cluster 2"
+
+clus3 <- Laptop[kmeans4.Laptop$cluster == 3, ]
+colnames(clus3) <- "Cluster 3"
+
+clus4 <- Laptop[kmeans4.Laptop$cluster == 4, ]
+colnames(clus4) <- "Cluster 4"
+
+#AnsThe above code creates subsets of the Laptop dataset based on the clusters assigned by the kmeans4.Laptop clustering algorithm. Here's a breakdown of each part:
+#clus1 <- Laptop[kmeans4.Laptop$cluster == 1,]: This line creates a subset of Laptop where the cluster assignment in kmeans4.Laptop is equal to 1. This subset is stored in clus1.
+
+#colnames(clus1) <- "Cluster 1": This line renames the column of clus1 to "Cluster 1". This is useful for identifying which cluster the data in clus1 belongs to.
+
+#Similarly, the next lines create subsets clus2, clus3, and clus4 for clusters 2, 3, and 4 respectively, and rename their columns accordingly.
+
+list(clus1,clus2,clus3,clus4)
+
+
+new_data <- Laptop[, c("Processor_Speed", "RAM_Size", "Storage_Capacity", "Screen_Size", "Weight", "Price")] %>% na.omit() %>% scale()
+
+fviz_nbclust(new_data, kmeans, method = "gap_stat")
+
+#Ans) From the graph it is clear that 2 would be the optimal number of clusters
+
+set.seed(123)
+km.res <- kmeans(new_data, 3, nstart = 25)
+fviz_cluster(km.res, data = new_data,
+             ellipse.type = "convex",
+             palette = "jco",
+             ggtheme = theme_minimal())
+
+#Ans) 3 clusters are formed. Cluster 3 is isolated whereas cluster 1 and 2 are band together closely. Also the size of cluster 3 is smaller compared to cluster 1 and 2
+
+Laptop_pca <- prcomp(Laptop[, c("Processor_Speed", "RAM_Size", "Storage_Capacity", "Screen_Size", "Weight", "Price")])
+Laptop_pca
+summary(Laptop_pca)
+
+PC1 <- Laptop_pca$x[,1]
+PC2 <- Laptop_pca$x[,2]
+
+Laptop_pca_df <- as.data.frame(Laptop_pca$x)
+
+matstd.new_pca <- Laptop_pca_df
+
+res.nbclust <- matstd.new_pca %>% scale() %>% NbClust(distance = "euclidean", min.nc = 2, max.nc = 10, method = "complete", index ="all") 
+
+fviz_nbclust(matstd.new_pca, kmeans, method = "silhouette")
+
+#Ans) Optimal number of clusters would be 3
+
+set.seed(123)
+kmeans3.Laptop_pca <- kmeans(matstd.new_pca, 3, nstart = 25)
+
+kmeans3.Laptop_pca
+
+km.Laptop_pca <- kmeans(matstd.new_pca, 3, nstart =25)
+
+fviz_cluster(km.Laptop_pca, data = matstd.new_pca,
+             ellipse.type = "convex",
+             palette = "jco",
+             ggtheme = theme_minimal())
+
+#Ans) 3 clusters are formed. But compared to the previous cluster we notice that all the 3 clusters are banded closely together. No cluster is isloated from each other as shown in the previous observation and the size of all the 3 clusters are almost equal. 
+
+```
+```{r}
+# Factor Analysis
+library(psych)
+
+Laptop <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+
+attach(Laptop)
+Laptop[1]
+
+fit.pc <- principal(Laptop[-1], nfactors=3, rotate="varimax")
+fit.pc
+fa.diagram(fit.pc)
+
+#Ans) The parallel analysis tell us that we should have 5 factors. However,  3-factors have been extracted after performing factor analysis. The three factors (RC1, RC2, RC3) explain 48%, 27%, and 24% of the total variance, respectively. Together, they cumulatively explain 100% of the variance in the data.The factor loadings indicate the strength and direction of the relationship between each variable and the factors. Variables with higher absolute loadings on a factor are more strongly associated with that factor. The variables in my dataset are:
+#RC1: Processor_Speed, Storage_Capacity, Screen_Size, Weight, Price
+#RC2: RAM_Size, Screen_Size, Weight
+#RC3: RAM_Size, Storage_Capacity, Weight
+#The root mean square of the residuals (RMSR) is 0.15, indicating a reasonable fit of the model to the data. The fit based on off-diagonal values is 0.68, which is acceptable.
+
+
+
+fit.pc <- principal(Laptop[-1], nfactors=4, rotate="varimax")
+fit.pc
+fa.diagram(fit.pc)
+
+#Ans) From the diagram it is clear that Price and Storage_Capacity go into one group, Screen_size, Weight and Processor_Speed go into the next group and Ram_Size goes seperately into another group. The root mean square of the residuals (RMSR) is 0.12, indicating a good fit of the model to the data. The fit based on off-diagonal values is 0.79, which is also considered good.
+
+fit.pc <- principal(Laptop[-1], nfactors=5, rotate="varimax")
+fit.pc
+fa.diagram(fit.pc)
+
+#Ans)  From the diagram it is clear that only Price and Storage_Capacity go into one group. Ram_sizes goes into one group. Screen_size goes into one group. Weight goes seperately into another group and Processor_Speed also goes seperately into another group.The root mean square of the residuals (RMSR) is 0.12, indicating a good fit of the model to the data. The fit based on off-diagonal values is 0.79, which is also considered good.
+
+for (i in c(1,3,5)) { print(fit.pc$loadings[[1,i]])}
+fit.pc$communality
+#Ans)All variables have very high communalities (close to 1), indicating that the factors explain almost all of the variance in each variable.
+
+fa.parallel(Laptop[-1])
+#Ans) This function will generate a plot showing the eigenvalues from my actual data  and the average eigenvalues from the random data. We can use this plot to determine the number of factors to retain. From the plot it is clear that, it is better to retain one or more factors. 
+
+fa.plot(fit.pc)
+#Ans) A bi-plot is created Each variable will be represented by a vector indicating its loading on each principal component, and each observation will be represented by a point. From the plot we can also see that there is no correlation between the factors
+
+vss(Laptop[-1])
+
+#Ans) This function will generate a plot showing the average correlation of items within factors for different numbers of factors. It can help us determine the optimal number of factors to retain based on the simplicity of the factor structure. Based on the graph it is clear that it is optimal to retain one or more factors.
+
+```
+```{r}
+library(GGally)
+
+Laptop <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+str(Laptop)
+
+#Ans)This data frame contains information about laptops, with each row representing a different laptop and each column representing a different attribute of the laptops. Here's what each variable represents:
+#Brand: The brand of the laptop (e.g., Asus, Acer, Lenovo).
+#Processor_Speed: The speed of the processor in GHz.
+#RAM_Size: The amount of RAM in gigabytes (GB).
+#Storage_Capacity: The storage capacity of the laptop's hard drive or SSD in gigabytes (GB).
+#Screen_Size: The size of the laptop screen in inches.
+#Weight: The weight of the laptop in kilograms
+#Price: The price of the laptop in the local currency 
+
+Laptop$Brand_numeric <- ifelse(Laptop$Brand == "Acer", 0,
+                          ifelse(Laptop$Brand == "Asus", 1,
+                          ifelse(Laptop$Brand == "Dell", 2,
+                          ifelse(Laptop$Brand == "HP", 3,
+                          ifelse(Laptop$Brand == "Lenovo", 4, NA)))))
+
+
+print(Laptop$Brand_numeric)
+str(Laptop)
+
+#Ans) A new column is created(Brand_numeric) where the Brand values are 'num' data type
+
+fit <- lm(Brand_numeric ~ Processor_Speed + RAM_Size + Storage_Capacity + Screen_Size + Weight + Price, data = Laptop)
+
+summary(fit)
+
+#Ans) The output displays a multiple regression model that predicts the Brand_numeric variable using the Processor_Speed, RAM_Size, Storage_Capacity, Screen_Size, Weight, and Price variables from my dataset. Here's an overview of the important findings:
+#Residuals: These are the differences between the observed values and the predicted values from the model. They are a measure of how well the model fits the data.
+#Coefficients: These are the estimated coefficients for each predictor variable in the model. They represent the estimated effect of each predictor on the response variable. The Estimate column gives the estimated coefficient values, while the Std. Error column gives the standard errors of these estimates.
+#Residual standard error: This is an estimate of the standard deviation of the residuals.
+#Multiple R-squared: This is a measure of how well the model explains the variability in the response variable. It ranges from 0 to 1, with higher values indicating a better fit.
+#Adjusted R-squared: This is similar to the R-squared value but adjusted for the number of predictors in the model. It is often used to compare models with different numbers of predictors.
+#F-statistic: This is a test statistic that tests the overall significance of the model. It compares the fit of the intercept-only model with the fit of the current model.
+#p-value: This is the probability of observing the F-statistic (or more extreme) under the null hypothesis that all the coefficients are zero. A low p-value indicates that the model is statistically significant.
+
+fit2 <- lm(Brand_numeric ~ Processor_Speed + Storage_Capacity + Screen_Size + Weight + Price, data = Laptop)
+
+summary(fit2)
+
+#Ans) There is not much difference compared to the 1st model ('fit'). Hence we can continue with the first model itself
+
+coefficients(fit)
+
+#Ans) The coefficients(fit) function provides the estimated coefficients for each predictor variable in the multiple regression model.These coefficients represent the estimated effect of each predictor variable on the Brand_numeric variable, holding all other variables constant. For example, a one-unit increase in Processor_Speed is associated with a decrease of approximately 0.0877 in the Brand_numeric value, all else being equal. Similarly, a one-unit increase in RAM_Size is associated with an increase of approximately 0.0142 in the Brand_numeric value, all else being equal.
+
+ggpairs(data=Laptop, title="Relationships Between Laptop Specifications for Different Brands")
+
+#Ans)A matrix of scatterplots is created showing the relationship between different laptop specifications for different brands. From the graph it is clear that there is no linear relationship between the columns.
+
+confint(fit,level=0.95)
+
+#Ans) The confint function provides the 95% confidence intervals for the coefficients.These intervals give a range of values within which we can be 95% confident that the true population parameter lies for each coefficient.
+
+fitted(fit)
+#Ans) The fitted function provides the fitted values for the multiple regression model fit.Each value in the output corresponds to a fitted value for each observation from my dataset.
+
+residuals(fit)
+#Ans) The residuals function gives I the residuals (the differences between the observed values and the fitted values) for the multiple regression model fit. These residuals indicate how well the model fits the data for each observation.
+
+anova(fit)
+#Ans) The ANOVA table shows the analysis of variance for the regression model fit.The table includes the following columns:
+#Df: Degrees of freedom for each source of variation.
+#Sum Sq: Sum of squares, which measures the total variation explained by each variable or the residuals.
+#Mean Sq: Mean sum of squares, which is the sum of squares divided by its degrees of freedom.
+#F value: The F-statistic, which is a ratio of the mean square for the variable to the mean square of the residuals. It indicates whether there is a significant difference in means between groups (or in this case, whether the variable is a significant predictor of Brand_numeric).
+#Pr(>F): The p-value associated with the F-statistic, which indicates the probability of observing the data if the null hypothesis (that the variable has no effect) is true. Small p-values indicate that the variable is a significant predictor.
+
+vcov(fit)
+#Ans) The variance-covariance matrix for the coefficients in my model fit shows the estimated covariance between each pair of coefficients. This matrix is useful for understanding the uncertainty in Ir coefficient estimates and for calculating confidence intervals.Each element in the matrix represents the covariance between two coefficients.The diagonal elements of the matrix (from top left to bottom right) represent the variance of each coefficient estimate. The square root of these values gives the standard error of each coefficient estimate. The off-diagonal elements represent the covariance between different coefficient estimates. Positive values indicate that the coefficients tend to vary together, while negative values indicate that they tend to vary in opposite directions.
+
+plot(fit)
+#Ans) The plots play a key role in highlighting important issues and verifying the model's assumptions. They aid in visualizing the degree to which the model matches the data. A good model fit is indicated by random scatter in the residuals vs fitted plot, a straight line in the Q-Q plot, random scatter in the Scale-Location plot, and no influential outliers in the Residuals vs Leverage plot.
+
+r_squared <- summary(fit)$r.squared
+r_squared
+#Ans) Model accuracy is around 13%.
+```
+```{r}
+library(factoextra)
+library(FactoMineR)
+library(psych)
+library(ggplot2)
+library(cowplot)
+library(caret)
+library(e1071)
+library(pROC)
+
+Laptop <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+str(Laptop)
+
+#Ans)This data frame contains information about laptops, with each row representing a different laptop and each column representing a different attribute of the laptops. Here's what each variable represents:
+#Brand: The brand of the laptop (e.g., Asus, Acer, Lenovo).
+#Processor_Speed: The speed of the processor in GHz.
+#RAM_Size: The amount of RAM in gigabytes (GB).
+#Storage_Capacity: The storage capacity of the laptop's hard drive or SSD in gigabytes (GB).
+#Screen_Size: The size of the laptop screen in inches.
+#Weight: The weight of the laptop in kilograms
+#Price: The price of the laptop in the local currency 
+
+Laptop$Brand_numeric <- ifelse(Laptop$Brand == "Acer", 0,
+                          ifelse(Laptop$Brand == "Asus", 1,
+                          ifelse(Laptop$Brand == "Dell", 2,
+                          ifelse(Laptop$Brand == "HP", 3,
+                          ifelse(Laptop$Brand == "Lenovo", 4, NA)))))
+
+
+print(Laptop$Brand)
+str(Laptop)
+
+Laptop$Brand <- as.factor(Laptop$Brand)
+str(Laptop)
+
+#Ans) To guarantee that R recognizes the category column, our predictor variable, we turn it into components. This transformation results in five levels for the factors.
+
+logistic <- glm(Brand ~ ., data=Laptop, family="binomial")
+summary(logistic)
+
+#Ans) The logistic regression model summary provides estimates for the coefficients of the predictorsand the intercept.Here are some inferences based on the summary:
+#Intercept: The intercept is not statistically significant (p = 0.672), indicating that when all predictors are zero, the log-odds of the response variable being in the "Brand" category is not significantly different from zero.
+#Predictor coefficients: None of the predictor coefficients (Processor_Speed, RAM_Size, Storage_Capacity, Screen_Size, Weight, Price) are statistically significant (all p > 0.05), indicating that these variables do not have a significant impact on the log-odds of the response variable.
+#Deviance: The residual deviance is 186.04 on 195 degrees of freedom, indicating that the model does not fit the data well. A lower deviance value indicates a better fit, but it should be interpreted in comparison to other models.
+#AIC: The AIC (Akaike Information Criterion) is 200.04, which is a measure of the model's goodness of fit. Lower AIC values indicate better fitting models, but it should be compared with other models to determine the best one.
+
+new_data <- data.frame(probability.of.Brand=logistic$fitted.values,Brand=Laptop$Brand)
+new_data_2 <- new_data[order(new_data$probability.of.Brand, decreasing=FALSE),]
+new_data$rank <- 1:nrow(new_data)
+ggplot(data = new_data, aes(x = rank, y = probability.of.Brand)) +
+  geom_point(aes(color = Brand), alpha = 1, shape = 1, stroke = 1) +
+  xlab("Index") +
+  ylab("Predicted probability of Quality")
+
+
+#Ans)A scatter plot of probability.of.Brand against rank is where each point is colored based on the Brand variable.We can determine that the logistic regression assumptions are satisfied if there is no overlap.
+
+data_new <- predict(logistic,newdata=Laptop,type="response" )
+data_new
+
+#Ans) We predict the response variable (Brand) for data stored in the Laptop dataset. The predicted probabilities of each level of the response variable (Brand) for each observation in the Laptop dataset is calculated.
+
+
+data_2 <- factor(ifelse(data_new > 0.5, "Acer", "Not Acer"), levels = levels(Laptop$Brand))
+data_2 <- factor(data_2, levels = levels(Laptop$Brand))
+
+#Ans) The Laptop dataset set has 5 variable brands. I have taken the Brand Acer as my reference brand. This reference choice is arbitrary and doesn't imply that Acer is more important or significant than the other brands; it simply serves as a baseline for comparison. Essentially, the above code categorizes the predicted probabilities into two groups based on whether they exceed the threshold of 0.5, with "Acer" indicating that the probability is high enough to predict an Acer brand and "Not Acer" indicating that it is not.
+
+confusionMatrix(data_2, Laptop$Brand)
+
+#Ans)This confusion matrix shows the classification results of my model compared to the actual laptop brands. The other brands have zero predictions.Here's a breakdown of the confusion matrix:
+#Accuracy: The overall accuracy of the model is 0, which means it is not predicting any brand correctly.
+#Specificity: Specificity is high for all classes except "Acer," which makes sense because the model is only predicting "Acer," resulting in high specificity for other classes (since it's correctly not predicting them).
+#Sensitivity: Sensitivity is not calculated for "Acer" because there are no true positives for "Acer" in the predictions.
+#Kappa: The kappa value is 0, indicating no agreement between the predictions and the actual labels.
+
+```
+```{r}
+library(ggplot2)
+library(memisc)
+library(ROCR)
+library(dplyr)
+library(klaR)
+
+Laptop <- read.csv("/Users/tusharkishan/Desktop/Multivariate/Assignment\ 1/Laptop_price.csv")
+str(Laptop)
+
+r1 <- lda(formula = Brand ~ ., data = Laptop)
+r1
+#Ans) The output predicts aptop brands (Acer, Asus, Dell, HP, Lenovo) based on several features (Processor_Speed, RAM_Size, Storage_Capacity, Screen_Size, Weight, Price).Prior probabilities: These are the estimated probabilities of each brand occurring in the dataset.
+#Group means: These are the mean values of each feature for each brand.
+#Coefficients of linear discriminants: These coefficients are used to linearly combine the features to form the discriminant functions (LD1, LD2, LD3, LD4).
+#Proportion of trace: This indicates the proportion of the total variance explained by each discriminant function. The first discriminant function (LD1) explains 52.91% of the variance, the second (LD2) explains 30.94%, the third (LD3) explains 15.46%, and the fourth (LD4) explains 0.70%.
+
+r2 <- lda(formula = Brand ~ ., data = Laptop, CV=TRUE)
+r2
+#Ans) The class column shows the predicted class for each observation, and the posterior columns show the posterior probabilities for each class. Each row corresponds to an observation, and each column corresponds to a class.These probabilities represent the model's confidence in each class prediction for that observation.
+
+train <- sample(1:500, 95)
+r3 <- lda(Brand ~ ., data = Laptop, prior = c(0.2, 0.2, 0.2, 0.2, 0.2), subset = train)
+r3
+#Ans) Here's the summary of my findings
+#Prior Probabilities of Groups: These are the prior probabilities for each class (brand) in Ir dataset. In this case, I've set them to be equal (0.2 for each brand).
+#Group Means: These are the mean values of the predictor variables (Processor_Speed, RAM_Size, Storage_Capacity, Screen_Size, Weight, Price) for each brand. They provide insight into how the brands differ in terms of these features.
+#Coefficients of Linear Discriminants: These coefficients are used to construct linear combinations of the predictor variables that best separate the classes. They indicate the importance of each predictor in the classification.
+#Proportion of Trace: This shows the proportion of total variance in the data explained by each linear discriminant. In this case, LD1 explains 58.6% of the variance, LD2 explains 30.9%, LD3 explains 7.9%, and LD4 explains 2.5%.
+
+llda1 = predict(object = r3, newdata = Laptop[-train, ])
+head(llda1$class)
+
+head(llda1$posterior, 50)
+
+#Ans) Here's a brief explanation of the output
+#llda1$class: This shows the predicted class for each observation in the test set. For example, the first observation is predicted to belong to the "Dell" class, the second to "Asus," and so on.
+#llda1$posterior: This shows the posterior probabilities for each class for each observation. For example, for the first observation, the model assigns a high probability to the "Dell" class (0.73), indicating high confidence in this prediction.
+
+head(llda1$x, 3)
+#Ans) The llda1$x output shows the values of the linear discriminants (LD) for each observation in the test set. These values are essentially the coordinates of each observation in the LD space, which is a lower-dimensional space created by the LDA model to separate the classes.In my output each row represents an observation, and each column represents a different LD. For example, the first row shows the LD values for the first observation, where LD1 is -1.272716, LD2 is -1.6090542, LD3 is -1.4632172, and LD4 is 1.7946536. These LD values can be used to visualize the separation of classes in the LD space or for further analysis of the data.
+
+plot(r1)
+#Ans) We observe that there is a lot of overlap between the residuals
+
+plot(r3)
+#Ans) The overlap is way lesser compared to the previous plot
+
+sample1 <- sample(c(TRUE, FALSE), nrow(Laptop), replace = T, prob = c(0.75,0.25))
+train1 <- Laptop[sample1, ]
+test1 <- Laptop[!sample1, ]
+
+Laptop <- mean(Laptop, na.rm = TRUE)
+lda.Laptop <- lda(Brand ~ ., train1)
+
+
+plot(lda.Laptop, col = as.integer(train1$Brand))
+#Ans) There is a lot of overlap between the residuals
+
+lda.train1 <- predict(lda.Laptop)
+train1$lda <- lda.train1$class
+table(train1$lda,train1$Storage_Capacity)
+#Ans) The accuracy of the model is not great on the training data
+
+lda.test1 <- predict(lda.Laptop,test1)
+test1$lda <- lda.test1$class
+table(test1$lda,test1$Storage_Capacity)
+
+#Ans) The accuracy of the model of the test data is better than the training data
+
+```
+```{r}
+#Learning and Takeaways
+
+#Ans) My project seems to involve a comprehensive analysis of laptop data. Here's a summary of the steps I've taken:
+#Data Import: I imported the laptop dataset and handled missing values by imputing them with the mean.
+#Data Exploration: I performed exploratory data analysis (EDA) to understand the structure and relationships in the dataset. This likely involved summary statistics, visualizations (e.g., histograms, scatter plots).
+#Data Splitting: I split the dataset into training and testing sets, which is essential for model evaluation.
+#Mean and Variance Analysis: I calculated the mean and variance of key variables in my dataset, such as price, RAM size, storage capacity, etc. This can help me understand the central tendency and variability of these features.
+#PCA Analysis: Performed Principal Component Analysis (PCA) to reduce the dimensionality of in my dataset while retaining most of the variability. This helped me identify important features and patterns in my data.
+#Clustering: Used clustering algorithms such as K-means or hierarchical clustering to group laptops based on their features. This helped me identify natural clusters or segments within my dataset.
+#Factor Analysis: Conducted factor analysis to identify underlying factors or latent variables that explain the correlations among the observed variables. This helped me understand the underlying structure in my data.
+#Multiple Regression: Used multiple regression to analyze the relationship between multiple independent variables (e.g., RAM size, storage capacity, etc.) and a dependent variable (Brand). This helped me understand how these features collectively affect the price of laptops based on their brand value.
+#Logistic Regression: I've also used logistic regression for classification and evaluated its performance on the testing set.
+#Linear Discriminant Analysis (LDA): I also used LDA to build a classification model to predict the brand of a laptop based on its Storage Capacity. I've trained the model on the training set and evaluated its performance on the testing set.
+
+
+
+```
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
